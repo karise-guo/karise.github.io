@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/cat.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/cat.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/cat.jpg">
+  <link rel="mask-icon" href="/images/cat.jpg" color="#222">
+  <meta name="google-site-verification" content="6FbWia2UHu0Rj0-k91-sJlCX_0u5twNvlB9Nha097oc">
+  <meta name="baidu-site-verification" content="fecPuO9wLA">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"karise.cn","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"appID":"6R1TPR58SX","apiKey":"b7b85229dc744164111c058bfea5448c","indexName":"Karise","hits":{"per_page":10},"labels":{"input_placeholder":"请输入搜索内容...","hits_empty":"没有搜索到关于 “${query}” 的任何内容。","hits_stats":"一共搜索到 ${hits} 个结果，使用了 ${time} 毫秒。"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="由于最近公司需要将项目用 Swift 改写，项目中需要大量使用数据库，之前 OC 使用的是 Core Data ，Core Data 使用起来确实十分的繁琐，故决定在 Swift 中弃用，改用 Realm 数据库，下面将使用方法记录下来方便以后查看。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【iOS 开发】Realm Swift 数据库使用汇总">
+<meta property="og:url" content="https://karise.cn/2017/07/21/iOS/201707211728/index.html">
+<meta property="og:site_name" content="爱吃鸭梨的猫">
+<meta property="og:description" content="由于最近公司需要将项目用 Swift 改写，项目中需要大量使用数据库，之前 OC 使用的是 Core Data ，Core Data 使用起来确实十分的繁琐，故决定在 Swift 中弃用，改用 Realm 数据库，下面将使用方法记录下来方便以后查看。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://file.karise.cn/blog/57366843-68f12280-71ba-11e9-9100-0ccdd5b871de.png">
+<meta property="article:published_time" content="2017-07-21T09:28:29.000Z">
+<meta property="article:modified_time" content="2022-11-11T09:44:54.937Z">
+<meta property="article:author" content="爱吃鸭梨的猫">
+<meta property="article:tag" content="iOS 开发">
+<meta property="article:tag" content="Swift">
+<meta property="article:tag" content="Realm">
+<meta property="article:tag" content="RealmSwift">
+<meta property="article:tag" content="数据库">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://file.karise.cn/blog/57366843-68f12280-71ba-11e9-9100-0ccdd5b871de.png">
+
+<link rel="canonical" href="https://karise.cn/2017/07/21/iOS/201707211728/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【iOS 开发】Realm Swift 数据库使用汇总 | 爱吃鸭梨的猫</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-101397377-1"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-101397377-1');
+      }
+    </script>
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?23e551cb7374b653d003004a84ced259";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="爱吃鸭梨的猫" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta custom-logo">
+      <div class="site-meta-headline">
+        <a>
+          <img class="custom-logo-image" src="/images/cat.jpg" alt="爱吃鸭梨的猫">
+        </a>
+      </div>
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">爱吃鸭梨的猫</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">创造财富 才是时间最正确的归宿</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>博客首页</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/catalog/" rel="section"><i class="fa fa-fw fa-list-ul"></i>博文目录</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-folder-open"></i>文章分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-cloud"></i>标签云集</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-hourglass-half"></i>我的历程</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/message/" rel="section"><i class="fa fa-fw fa-commenting"></i>给我留言</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于博主</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索文章
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="algolia-results">
+  <div id="algolia-stats"></div>
+  <div id="algolia-hits"></div>
+  <div id="algolia-pagination" class="algolia-pagination"></div>
+</div>
+
+      
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://karise.cn/2017/07/21/iOS/201707211728/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/cat.jpg">
+      <meta itemprop="name" content="爱吃鸭梨的猫">
+      <meta itemprop="description" content="创造财富 才是时间最正确的归宿">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="爱吃鸭梨的猫">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【iOS 开发】Realm Swift 数据库使用汇总
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-07-21 17:28:29" itemprop="dateCreated datePublished" datetime="2017-07-21T17:28:29+08:00">2017-07-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-11-11 17:44:54" itemprop="dateModified" datetime="2022-11-11T17:44:54+08:00">2022-11-11</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS-%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">iOS 开发</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+            <img src="https://file.karise.cn/blog/57366843-68f12280-71ba-11e9-9100-0ccdd5b871de.png" itemprop="contentUrl">
+        </div>
+        <blockquote>
+<p>由于最近公司需要将项目用 <code>Swift</code> 改写，项目中需要大量使用数据库，之前 <code>OC</code> 使用的是 <code>Core Data</code> ，<code>Core Data</code> 使用起来确实十分的繁琐，故决定在 <code>Swift</code> 中弃用，改用 <code>Realm</code> 数据库，下面将使用方法记录下来方便以后查看。</p>
+</blockquote>
+<a id="more"></a>
+
+<hr>
+<h2 id="Realm-的优点"><a href="#Realm-的优点" class="headerlink" title="Realm 的优点"></a>Realm 的优点</h2><p><code>Realm</code> 不是基于 <code>Core Data</code>，也不是基于 <code>SQLite</code> 封装构建的。它有自己的数据库存储引擎，下面说一下 <code>Realm</code> 的一些优点。</p>
+<ul>
+<li><p><strong>跨平台：</strong> 现在很多应用都是要兼顾 <code>iOS</code> 和 <code>Android</code> 两个平台同时开发。如果两个平台都能使用相同的数据库，那就不用考虑内部数据的架构不同，使用 <code>Realm</code> 提供的 <code>API</code>，可以使数据持久化层在两个平台上无差异化的转换。代码可以使用 <code>Swift</code> 、<code>Objective-C</code> 以及 <code>Java</code> 语言来编写。</p>
+</li>
+<li><p><strong>简单易用：</strong> <code>Core Data</code> 和 <code>SQLite</code> 冗余、繁杂的知识和代码足以吓退绝大多数刚入门的开发者，而换用 <code>Realm</code>，则可以极大地减少学习成本，立即学会本地化存储的方法。大部分常用的功能（比如插入、查询等）都可以用一行简单的代码轻松完成，毫不吹嘘的说，把官方最新文档完整看一遍，就完全可以上手开发了，这是 <a target="_blank" rel="noopener" href="https://realm.io/cn/docs/swift/latest/">中文官方文档地址</a>。</p>
+</li>
+<li><p><strong>可视化：</strong> <code>Realm</code> 还提供了一个轻量级的数据库查看工具，在 <code>Mac Appstore</code> 可以下载 <code>Realm Browser</code> 这个工具，开发者可以查看数据库当中的内容，执行简单的插入和删除数据的操作。</p>
+</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509163244.jpg" alt="Realm Browser"></p>
+<h2 id="Realm-Swift-的安装"><a href="#Realm-Swift-的安装" class="headerlink" title="Realm Swift 的安装"></a>Realm Swift 的安装</h2><p>这是 <code>Realm</code> 的 <a target="_blank" rel="noopener" href="https://github.com/realm/realm-cocoa">GitHub 地址</a> ，其他方法我就不说了，我是用 <code>CocoaPods</code> 方式安装的，所以就只说 <code>CocoaPods</code> 的安装方法了。</p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://guides.cocoapods.org/using/getting-started">安装 CocoaPods 0.39.0 或者更高版本</a> 。</p>
+</li>
+<li><p>运行 <code>pod repo update</code> ，以确保 <code>CocoaPods</code> 能够获取到 <code>Realm</code> 的最新版本。</p>
+</li>
+<li><p>在你的 <code>Podfile</code> 中，添加 <code>use_frameworks!</code> 和 <code>pod &#39;RealmSwift&#39;</code> 到你的主要和测试目标。</p>
+</li>
+<li><p>如果你使用的是 <code>Xcode 8</code>，那么将下面代码复制到你的 <code>Podfile</code> 底部，以便在必要的时候更新 <code>Swift</code> 的版本。</p>
+</li>
+</ul>
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="attr">post_install</span> <span class="string">do |installer|</span></span><br><span class="line">  <span class="meta">installer.pods_project.targets.each</span> <span class="string">do |target|</span></span><br><span class="line">    <span class="meta">target.build_configurations.each</span> <span class="string">do |config|</span></span><br><span class="line">      <span class="meta">config.build_settings[&#x27;SWIFT_VERSION&#x27;]</span> = <span class="string">&#x27;3.0&#x27;</span></span><br><span class="line">    <span class="attr">end</span></span><br><span class="line">  <span class="attr">end</span></span><br><span class="line"><span class="attr">end</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>在终端运行 <code>pod install</code> 。</p>
+</li>
+<li><p>采用 <code>CocoaPods</code> 生成的 <code>.xcworkspace</code> 来运行工程。</p>
+</li>
+<li><p>在需要使用 <code>Realm Swift</code> 的地方加入 <code>import RealmSwift</code> 。</p>
+</li>
+</ul>
+<h2 id="Realm-Browser-的使用"><a href="#Realm-Browser-的使用" class="headerlink" title="Realm Browser 的使用"></a>Realm Browser 的使用</h2><p>先说一下 <code>Realm Browser</code> 这个数据库查看工具的使用方法。</p>
+<h3 id="1-模拟器调试"><a href="#1-模拟器调试" class="headerlink" title="1. 模拟器调试"></a>1. 模拟器调试</h3><ul>
+<li>如果是使用模拟器进行调试，首先通过以下代码打印出 <code>Realm</code> 数据库地址。</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">let</span> realm = <span class="keyword">try</span>! <span class="type">Realm</span>()</span><br><span class="line"><span class="built_in">print</span>(realm.configuration.fileURL!)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>然后打开 <code>Finder</code> 按下 <code>command + shift + G</code> 跳转到对应路径下，用 <code>Realm Browser</code> 打开对应的 <code>.realm</code> 文件就可以看到数据了。</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509163308.png" alt=".realm 文件"></p>
+<h3 id="2-真机调试"><a href="#2-真机调试" class="headerlink" title="2. 真机调试"></a>2. 真机调试</h3><ul>
+<li>如果是真机调试的话，打开 <code>Xcode</code> ，选择菜单 <code>Window</code> 下的 <code>Devices</code> 。</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509163322.png" alt="Devices"></p>
+<ul>
+<li>选择对应的设备与项目，点击 <code>Download Container</code>。</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509163334.png" alt="Download Container"></p>
+<ul>
+<li>导出 <code>xcappdata</code> 文件后，显示包内容，进到 <code>AppData</code> 下的 <code>Documents</code> ，使用 <code>Realm Browser</code> 打开 <code>.realm</code> 文件即可。</li>
+</ul>
+<h2 id="Realm-Swift-的使用"><a href="#Realm-Swift-的使用" class="headerlink" title="Realm Swift 的使用"></a>Realm Swift 的使用</h2><h3 id="1-配置-Realm-数据库"><a href="#1-配置-Realm-数据库" class="headerlink" title="1. 配置 Realm 数据库"></a>1. 配置 Realm 数据库</h3><ul>
+<li>将以下代码写在 <code>AppDelegate</code> 的 <code>didFinishLaunchingWithOptions</code> 方法中，这个方法主要用于数据模型属性增加或删除时的数据迁移，每次模型属性变化时，将 <code>schemaVersion </code> 加 <code>1</code> 即可，<code>Realm</code> 会自行检测新增和需要移除的属性，然后自动更新硬盘上的数据库架构，移除属性的数据将会被删除。</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* Realm 数据库配置，用于数据库的迭代更新 */</span></span><br><span class="line"><span class="keyword">let</span> schemaVersion: <span class="type">UInt64</span> = <span class="number">0</span></span><br><span class="line"><span class="keyword">let</span> config = <span class="type">Realm</span>.<span class="type">Configuration</span>(schemaVersion: schemaVersion, migrationBlock: &#123; migration, oldSchemaVersion <span class="keyword">in</span></span><br><span class="line">    <span class="comment">/* 什么都不要做！Realm 会自行检测新增和需要移除的属性，然后自动更新硬盘上的数据库架构 */</span></span><br><span class="line">    <span class="keyword">if</span> (oldSchemaVersion &lt; schemaVersion) &#123;&#125;</span><br><span class="line">&#125;)</span><br><span class="line"><span class="type">Realm</span>.<span class="type">Configuration</span>.defaultConfiguration = config</span><br><span class="line"><span class="type">Realm</span>.asyncOpen &#123; (realm, error) <span class="keyword">in</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">let</span> <span class="number">_</span> = realm &#123; <span class="comment">// Realm 成功打开，迁移已在后台线程中完成</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Realm 数据库配置成功&quot;</span>)</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="keyword">let</span> error = error &#123; <span class="comment">// 处理打开 Realm 时所发生的错误</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Realm 数据库配置失败：\(error.localizedDescription)&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>如果属性改变后，想要保留原来已存在的数据来更新新的属性值，在属性变化后将 <code>schemaVersion</code> 加 <code>1</code> ，并将 <code>config</code> 改为如下，其余不变。</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">let</span> config = <span class="type">Realm</span>.<span class="type">Configuration</span>(schemaVersion: schemaVersion, migrationBlock: &#123; migration, oldSchemaVersion <span class="keyword">in</span></span><br><span class="line">    <span class="keyword">if</span> (oldSchemaVersion &lt; schemaVersion) &#123;</span><br><span class="line">        migration.enumerateObjects(ofType: <span class="type">Dog</span>.className()) &#123; oldObject, newObject <span class="keyword">in</span></span><br><span class="line">            <span class="comment">/* 将 Dog 表中旧的 firstName 和 lastName 属性删除，数据保留合并为 fullName 属性 */</span></span><br><span class="line">            <span class="keyword">let</span> firstName = oldObject![<span class="string">&quot;firstName&quot;</span>] <span class="keyword">as</span>! <span class="type">String</span></span><br><span class="line">            <span class="keyword">let</span> lastName = oldObject![<span class="string">&quot;lastName&quot;</span>] <span class="keyword">as</span>! <span class="type">String</span></span><br><span class="line">            newObject![<span class="string">&quot;fullName&quot;</span>] = <span class="string">&quot;\(firstName) \(lastName)&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>如果是只是属性重命名，想保留原来已经存在的数据，重命名以后将 <code>schemaVersion</code> 加 <code>1</code> ，并将 <code>config</code> 改为如下，其余不变，并且重命名操作应该在调用上面 <code>enumerateObjects(ofType: _:)</code> 之外完成。</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">let</span> config = <span class="type">Realm</span>.<span class="type">Configuration</span>(schemaVersion: schemaVersion, migrationBlock: &#123; migration, oldSchemaVersion <span class="keyword">in</span></span><br><span class="line">    <span class="keyword">if</span> (oldSchemaVersion &lt; schemaVersion) &#123;</span><br><span class="line">        <span class="comment">/* 将 Dog 表的 name 属性重命名为 fullName */</span></span><br><span class="line">        migration.renameProperty(onType: <span class="type">Dog</span>.className(), from: <span class="string">&quot;name&quot;</span>, to: <span class="string">&quot;fullName&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-Model-数据模型"><a href="#2-Model-数据模型" class="headerlink" title="2. Model 数据模型"></a>2. Model 数据模型</h3><p><code>Realm</code> 数据模型是基于标准 <code>Swift</code> 类来进行定义的，使用属性来完成模型的具体定义，<code>Realm</code> 模型对象在形式上基本上与其他 <code>Swift</code> 对象相同，你可以给它们添加您自己的方法和协议，和在其他对象中使用类似。</p>
+<h4 id="Realm-支持的属性类"><a href="#Realm-支持的属性类" class="headerlink" title="Realm 支持的属性类"></a>Realm 支持的属性类</h4><p><code>Realm</code> 支持这几种属性类型：<code>Bool</code>、<code>Int8</code>、<code>Int16</code>、<code>Int32</code>、<code>Int64</code>、<code>Double</code>、<code>Float</code>、<code>String</code>、<code>NSDate</code> 以及 <code>NSData</code> ，下面的表格提供了关于声明模型属性的简易参考。</p>
+<table>
+<thead>
+<tr>
+<th align="left">类型</th>
+<th align="left">非可选值形式</th>
+<th align="left">可选值形式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>Bool</strong></td>
+<td align="left"><code>dynamic var value = false</code></td>
+<td align="left"><code>let value = RealmOptional&lt;Bool&gt;()</code></td>
+</tr>
+<tr>
+<td align="left"><strong>Int</strong></td>
+<td align="left"><code>dynamic var value = 0</code></td>
+<td align="left"><code>let value = RealmOptional&lt;Int&gt;()</code></td>
+</tr>
+<tr>
+<td align="left"><strong>Float</strong></td>
+<td align="left"><code>dynamic var value: Float = 0.0</code></td>
+<td align="left"><code>let value = RealmOptional&lt;Float&gt;()</code></td>
+</tr>
+<tr>
+<td align="left"><strong>Double</strong></td>
+<td align="left"><code>dynamic var value: Double = 0.0</code></td>
+<td align="left"><code>let value = RealmOptional&lt;Double&gt;()</code></td>
+</tr>
+<tr>
+<td align="left"><strong>String</strong></td>
+<td align="left"><code>dynamic var value = &quot;&quot;</code></td>
+<td align="left"><code>dynamic var value: String? = nil</code></td>
+</tr>
+<tr>
+<td align="left"><strong>Data</strong></td>
+<td align="left"><code>dynamic var value = NSData()</code></td>
+<td align="left"><code>dynamic var value: NSData? = nil</code></td>
+</tr>
+<tr>
+<td align="left"><strong>Date</strong></td>
+<td align="left"><code>dynamic var value = NSDate()</code></td>
+<td align="left"><code>dynamic var value: NSDate? = nil</code></td>
+</tr>
+<tr>
+<td align="left"><strong>Object</strong></td>
+<td align="left"><code>必须是可选值</code></td>
+<td align="left"><code>dynamic var value: Class?</code></td>
+</tr>
+<tr>
+<td align="left"><strong>List</strong></td>
+<td align="left"><code>let value = List&lt;Class&gt;()</code></td>
+<td align="left"><code>必须是非可选值</code></td>
+</tr>
+<tr>
+<td align="left"><strong>LinkingObjects</strong></td>
+<td align="left"><code>let value = LinkingObjects(fromType: Class.self, property: &quot;property&quot;)</code></td>
+<td align="left"><code>必须是非可选值</code></td>
+</tr>
+</tbody></table>
+<h4 id="Model-数据模型创建"><a href="#Model-数据模型创建" class="headerlink" title="Model 数据模型创建"></a>Model 数据模型创建</h4><p>下面以 <code>Dog</code> 和 <code>Person</code> 为例，通过简单的继承 <code>Object</code> 或者一个已经存在的模型类，你就可以创建一个新的 <code>Realm</code> 数据模型对象。</p>
+<h5 id="普通的数据模型"><a href="#普通的数据模型" class="headerlink" title="普通的数据模型"></a>普通的数据模型</h5><figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">/// 狗狗的数据模型</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Dog</span>: <span class="title">Object</span> </span>&#123;</span><br><span class="line">    <span class="keyword">dynamic</span> <span class="keyword">var</span> name: <span class="type">String?</span></span><br><span class="line">    <span class="keyword">dynamic</span> <span class="keyword">var</span> age = <span class="number">0</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 狗狗主人的数据模型</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span>: <span class="title">Object</span> </span>&#123;</span><br><span class="line">    <span class="keyword">dynamic</span> <span class="keyword">var</span> name: <span class="type">String?</span></span><br><span class="line">    <span class="keyword">dynamic</span> <span class="keyword">var</span> birthdate = <span class="type">NSDate</span>()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="关系绑定"><a href="#关系绑定" class="headerlink" title="关系绑定"></a>关系绑定</h5><figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">/// 狗狗的数据模型</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Dog</span>: <span class="title">Object</span> </span>&#123;</span><br><span class="line">    <span class="keyword">dynamic</span> <span class="keyword">var</span> name: <span class="type">String?</span></span><br><span class="line">    <span class="keyword">dynamic</span> <span class="keyword">var</span> age = <span class="number">0</span></span><br><span class="line">    <span class="keyword">dynamic</span> <span class="keyword">var</span> owner: <span class="type">Person?</span>  <span class="comment">// 对一关系</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 狗狗主人的数据模型</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span>: <span class="title">Object</span> </span>&#123;</span><br><span class="line">    <span class="keyword">dynamic</span> <span class="keyword">var</span> name: <span class="type">String?</span></span><br><span class="line">    <span class="keyword">dynamic</span> <span class="keyword">var</span> birthdate = <span class="type">NSDate</span>()</span><br><span class="line">    <span class="keyword">let</span> dogs = <span class="type">List</span>&lt;<span class="type">Dog</span>&gt;()  <span class="comment">// 对多关系</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="反向关系"><a href="#反向关系" class="headerlink" title="反向关系"></a>反向关系</h5><p>如果对多关系属性 <code>Person.dogs</code> 链接了一个 <code>Dog</code> 实例，而这个实例的对一关系属性 <code>Dog.owner</code> 又链接到了对应的这个 <code>Person</code> 实例，那么实际上这些链接仍然是互相独立的。</p>
+<p>为 <code>Person</code> 实例的 <code>dogs</code> 属性添加一个新的 <code>Dog</code> 实例，并不会将这个 <code>Dog</code> 实例的 <code>owner</code> 属性自动设置为该 <code>Person</code>。</p>
+<p>但是由于手动同步双向关系会很容易出错，并且这个操作还非常得复杂、冗余，因此 <code>Realm</code> 提供了 <code>链接对象 (linking objects)</code> 属性来表示这些反向关系。</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">/// 狗狗的数据模型</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Dog</span>: <span class="title">Object</span> </span>&#123;</span><br><span class="line">    <span class="keyword">dynamic</span> <span class="keyword">var</span> name: <span class="type">String?</span></span><br><span class="line">    <span class="keyword">dynamic</span> <span class="keyword">var</span> age = <span class="number">0</span></span><br><span class="line">    <span class="keyword">let</span> owner = <span class="type">LinkingObjects</span>(fromType: <span class="type">Person</span>.<span class="keyword">self</span>, property: <span class="string">&quot;dogs&quot;</span>) <span class="comment">// 反向关系</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 狗狗主人的数据模型</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span>: <span class="title">Object</span> </span>&#123;</span><br><span class="line">    <span class="keyword">dynamic</span> <span class="keyword">var</span> name: <span class="type">String?</span></span><br><span class="line">    <span class="keyword">dynamic</span> <span class="keyword">var</span> birthdate = <span class="type">NSDate</span>()</span><br><span class="line">    <span class="keyword">let</span> dogs = <span class="type">List</span>&lt;<span class="type">Dog</span>&gt;()  <span class="comment">// 对多关系</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="索引属性（Indexed-Properties）"><a href="#索引属性（Indexed-Properties）" class="headerlink" title="索引属性（Indexed Properties）"></a>索引属性（Indexed Properties）</h5><p>重写 <code>Object.indexedProperties()</code> 方法可以为数据模型中需要添加索引的属性建立索引。<code>Realm</code> 支持<code>字符串</code>、<code>整数</code>、<code>布尔值</code> 以及 <code>NSDate</code> 属性作为索引。对属性进行索引可以减少插入操作的性能耗费，加快比较检索的速度（比如说 <code>=</code> 以及 <code>IN</code> 操作符）</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">/// 狗狗的数据模型</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Dog</span>: <span class="title">Object</span> </span>&#123;</span><br><span class="line">    <span class="keyword">dynamic</span> <span class="keyword">var</span> name: <span class="type">String?</span></span><br><span class="line">    <span class="keyword">dynamic</span> <span class="keyword">var</span> age = <span class="number">0</span></span><br><span class="line">    <span class="keyword">override</span> <span class="class"><span class="keyword">class</span> <span class="title">func</span> <span class="title">indexedProperties</span>() -&gt; [<span class="title">String</span>] </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> [<span class="string">&quot;name&quot;</span>]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="主键（Primary-Keys）"><a href="#主键（Primary-Keys）" class="headerlink" title="主键（Primary Keys）"></a>主键（Primary Keys）</h5><p>重写 <code>Object.primaryKey()</code> 可以设置模型的主键。声明主键之后，对象将允许进行查询，并且更新速度更加高效，而这也会要求每个对象保持唯一性。 一旦带有主键的对象被添加到 <code>Realm</code> 之后，该对象的主键将不可修改。</p>
+<p><code>Realm</code> 可以将 <code>Int</code> 和 <code>String</code> 类型的属性设为主键，但是不支持自增长属性，所以只能自己给主键生成一个唯一的标识，可以使用 <code>UUID().uuidString</code> 方法生成唯一主键。</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">/// 狗狗的数据模型</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Dog</span>: <span class="title">Object</span> </span>&#123;</span><br><span class="line">    <span class="keyword">dynamic</span> <span class="keyword">var</span> id = <span class="type">UUID</span>().uuidString</span><br><span class="line">    <span class="keyword">dynamic</span> <span class="keyword">var</span> name: <span class="type">String?</span></span><br><span class="line">    <span class="keyword">dynamic</span> <span class="keyword">var</span> age = <span class="number">0</span></span><br><span class="line">    <span class="keyword">override</span> <span class="class"><span class="keyword">class</span> <span class="title">func</span> <span class="title">primaryKey</span>() -&gt; <span class="title">String</span>? </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;id&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="忽略属性（Ignored-Properties）"><a href="#忽略属性（Ignored-Properties）" class="headerlink" title="忽略属性（Ignored Properties）"></a>忽略属性（Ignored Properties）</h5><p>重写 <code>Object.ignoredProperties()</code> 可以防止 <code>Realm</code> 存储数据模型的某个属性。<code>Realm</code> 将不会干涉这些属性的常规操作，它们将由成员变量提供支持，并且您能够轻易重写它们的 <code>setter</code> 和 <code>getter</code> 。</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">/// 狗狗的数据模型</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Dog</span>: <span class="title">Object</span> </span>&#123;</span><br><span class="line">    <span class="keyword">dynamic</span> <span class="keyword">var</span> name: <span class="type">String?</span></span><br><span class="line">    <span class="keyword">dynamic</span> <span class="keyword">var</span> age = <span class="number">0</span></span><br><span class="line">    <span class="keyword">override</span> <span class="class"><span class="keyword">class</span> <span class="title">func</span> <span class="title">ignoredProperties</span>() -&gt; [<span class="title">String</span>]? </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> [<span class="string">&quot;name&quot;</span>]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-创建数据模型对象"><a href="#3-创建数据模型对象" class="headerlink" title="3. 创建数据模型对象"></a>3. 创建数据模型对象</h3><ul>
+<li>可以用多种方法创建一个新的对象：</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* (1) 创建一个狗狗对象，然后设置其属性 */</span></span><br><span class="line"><span class="keyword">var</span> myDog = <span class="type">Dog</span>()</span><br><span class="line">myDog.name = <span class="string">&quot;大黄&quot;</span></span><br><span class="line">myDog.age = <span class="number">10</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* (2) 通过字典创建狗狗对象 */</span></span><br><span class="line"><span class="keyword">let</span> myOtherDog = <span class="type">Dog</span>(value: [<span class="string">&quot;name&quot;</span> : <span class="string">&quot;豆豆&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="number">3</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment">/* (3) 通过数组创建狗狗对象 */</span></span><br><span class="line"><span class="keyword">let</span> myThirdDog = <span class="type">Dog</span>(value: [<span class="string">&quot;豆豆&quot;</span>, <span class="number">5</span>])</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>即使是数组以及字典的多重嵌套，<code>Realm</code> 也能够轻松完成对象的创建。注意 <code>List</code> 只能够包含 <code>Object</code> 类型，不能包含诸如 <code>String</code> 之类的基础类型。</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 这里我们就可以使用已存在的狗狗对象来完成初始化 */</span></span><br><span class="line"><span class="keyword">let</span> aPerson = <span class="type">Person</span>(value: [<span class="string">&quot;李四&quot;</span>, <span class="number">30</span>, [aDog, anotherDog]])</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 还可以使用多重嵌套 */</span></span><br><span class="line"><span class="keyword">let</span> anotherPerson = <span class="type">Person</span>(value: [<span class="string">&quot;李四&quot;</span>, <span class="number">30</span>, [[<span class="string">&quot;小黑&quot;</span>, <span class="number">5</span>], [<span class="string">&quot;旺财&quot;</span>, <span class="number">6</span>]]])</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-数据库操作（增删改查）"><a href="#4-数据库操作（增删改查）" class="headerlink" title="4. 数据库操作（增删改查）"></a>4. 数据库操作（增删改查）</h3><p>任何操作都需要获取 <code>Realm</code> 实例，每个线程只需要使用一次即可。</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 获取默认的 Realm 实例，每个线程只需要使用一次即可 */</span></span><br><span class="line"><span class="keyword">let</span> realm = <span class="keyword">try</span>! <span class="type">Realm</span>()</span><br></pre></td></tr></table></figure>
+
+<h4 id="增加数据"><a href="#增加数据" class="headerlink" title="增加数据"></a>增加数据</h4><figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 创建一个 Dog 对象 */</span></span><br><span class="line"><span class="keyword">let</span> dog = <span class="type">Dog</span>(value: [<span class="string">&quot;name&quot;</span> : <span class="string">&quot;豆豆&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="number">3</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 创建一个 Dog 对象数组 */</span></span><br><span class="line"><span class="keyword">let</span> dogs = [<span class="type">Dog</span>(value: [<span class="string">&quot;name&quot;</span>: <span class="string">&quot;张三&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="number">1</span>]), <span class="type">Dog</span>(value: [<span class="string">&quot;name&quot;</span>: <span class="string">&quot;李四&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="number">2</span>]), <span class="type">Dog</span>(value: [<span class="string">&quot;name&quot;</span>: <span class="string">&quot;王五&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="number">3</span>])]</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 通过事务将数据添加到 Realm 中 */</span></span><br><span class="line"><span class="keyword">try</span>! realm.write &#123;</span><br><span class="line">    realm.add(dog) <span class="comment">// 增加单个数据</span></span><br><span class="line">    realm.add(dogs) <span class="comment">// 增加多个数据</span></span><br><span class="line">    realm.create(<span class="type">Dog</span>.<span class="keyword">self</span>, value: [<span class="string">&quot;name&quot;</span> : <span class="string">&quot;豆豆&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="number">3</span>], update: <span class="literal">true</span>) <span class="comment">// 直接根据 JSON 数据增加</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="删除数据"><a href="#删除数据" class="headerlink" title="删除数据"></a>删除数据</h4><figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">// let dog = ... 存储在 Realm 中的 Dog 对象</span></span><br><span class="line"><span class="comment">// let dogs = ... 存储在 Realm 中的多个 Dog 对象</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 在事务中删除数据 */</span></span><br><span class="line"><span class="keyword">try</span>! realm.write &#123;</span><br><span class="line">    realm.delete(dog) <span class="comment">// 删除单个数据</span></span><br><span class="line">    realm.delete(dogs) <span class="comment">// 删除多个数据</span></span><br><span class="line">    realm.deleteAll() <span class="comment">// 从 Realm 中删除所有数据</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="修改数据"><a href="#修改数据" class="headerlink" title="修改数据"></a>修改数据</h4><ul>
+<li><strong>内容直接更新：</strong> 在事务中直接修改某一条数据。</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">// let dog = ... 存储在 Realm 中的 Dog 对象</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 在一个事务中修改数据 */</span></span><br><span class="line"><span class="keyword">try</span>! realm.write &#123;</span><br><span class="line">    dog.name = <span class="string">&quot;张三&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>** 通过主键更新： ** 如果你的数据模型中设置了主键的话，那么你可以使用 <code>Realm().add(_:update:)</code> 来更新数据，如果数据不存在时会自动插入新的数据。</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">// let dog = ... 存储在 Realm 中的 Dog 对象（有主键）</span></span><br><span class="line"><span class="comment">// let dogs = ... 存储在 Realm 中的多个 Dog 对象（有主键）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 在一个事务中修改数据 */</span></span><br><span class="line"><span class="keyword">try</span>! realm.write &#123;</span><br><span class="line">    realm.add(dog, update: <span class="literal">true</span>) <span class="comment">// 更新单个数据</span></span><br><span class="line">    realm.add(dogs, update: <span class="literal">true</span>) <span class="comment">// 更新多个数据</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>键值编码：</strong> <code>Object</code>、<code>Result</code> 以及 <code>List</code> 都遵守 <a target="_blank" rel="noopener" href="https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/KeyValueCoding/">键值编码(Key-Value Coding)</a> 机制。 当你在运行时才能决定哪个属性需要更新的时候，这个方法是最有用的。将 <code>KVC</code> 应用在集合当中是大量更新对象的极佳方式，这样就可以不用经常遍历集合，为每个项目创建一个访问器了。</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">// let dogs = ... 存储在 Realm 中的多个 Dog 对象</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 在一个事务中修改数据 */</span></span><br><span class="line"><span class="keyword">try</span>! realm.write &#123;</span><br><span class="line">    dogs.first?.setValue(<span class="string">&quot;张三&quot;</span>, forKeyPath: <span class="string">&quot;name&quot;</span>) <span class="comment">// 将第一个狗狗名字改为张三</span></span><br><span class="line">    dogs.setValue(<span class="string">&quot;张三&quot;</span>, forKeyPath: <span class="string">&quot;name&quot;</span>) <span class="comment">// 将所有狗狗名字都改为张三</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="查询数据"><a href="#查询数据" class="headerlink" title="查询数据"></a>查询数据</h4><ul>
+<li><strong>普通查询：</strong> 查询数据库中某张表的所有数据。</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 从数据库中查询所有狗狗 */</span></span><br><span class="line"><span class="keyword">let</span> dogs = realm.objects(<span class="type">Dog</span>.<span class="keyword">self</span>)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>主键查询：</strong> 根据 <code>主键</code> 查询某张表的某条数据，模型必须包含主键，否则会崩溃。</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 从数据库中查询主键为 1 的狗狗 */</span></span><br><span class="line"><span class="keyword">let</span> dog = realm.object(ofType: <span class="type">Dog</span>.<span class="keyword">self</span>, forPrimaryKey: <span class="string">&quot;1&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>条件查询：</strong> 根据 <code>断言字符串</code> 或者 <code> NSPredicate 谓词</code> 查询某张表中的符合条件数据。</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 根据断言字符串从数据库查询 name 为 张三 的狗狗 */</span></span><br><span class="line"><span class="keyword">var</span> dogs = realm.objects(<span class="type">Dog</span>.<span class="keyword">self</span>).<span class="built_in">filter</span>(<span class="string">&quot;name = %@&quot;</span>, <span class="string">&quot;张三&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 根据 NSPredicate 谓词从数据库查询 age 小于 5 并且 name 以 ‘张’ 开头的狗狗 */</span></span><br><span class="line"><span class="keyword">let</span> predicate = <span class="type">NSPredicate</span>(format: <span class="string">&quot;age &lt; 5 AND name BEGINSWITH &#x27;张&#x27;&quot;</span>)</span><br><span class="line"><span class="keyword">var</span> dogs = realm.objects(<span class="type">Dog</span>.<span class="keyword">self</span>).<span class="built_in">filter</span>(predicate)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>排序查询：</strong> 将查询结果进行排序，可以和条件查询配合使用。</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 将查询到的狗狗根据名字升序进行排序 */</span></span><br><span class="line"><span class="keyword">let</span> dogs = realm.objects(<span class="type">Dog</span>.<span class="keyword">self</span>).sorted(byKeyPath: <span class="string">&quot;name&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 将查询到的狗狗根据名字降序进行排序 */</span></span><br><span class="line"><span class="keyword">let</span> dogs = realm.objects(<span class="type">Dog</span>.<span class="keyword">self</span>).sorted(byKeyPath: <span class="string">&quot;name&quot;</span>, ascending: <span class="literal">false</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 将查询到的狗狗根据名字和年龄升序进行排序 */</span></span><br><span class="line"><span class="keyword">let</span> dogs = realm.objects(<span class="type">Dog</span>.<span class="keyword">self</span>).sorted(by: [<span class="string">&quot;name&quot;</span>, <span class="string">&quot;age&quot;</span>])</span><br></pre></td></tr></table></figure>
+
+<hr>
+<blockquote>
+<p>想要了解更多可以查看  <a target="_blank" rel="noopener" href="https://realm.io/cn/docs/swift/latest/">中文官方文档地址</a> ，有不足之处之后会补充，<code>OC</code> 版本的话可以看这篇文章：<a target="_blank" rel="noopener" href="http://www.jianshu.com/p/50e0efb66bdf">Realm数据库 从入门到“放弃”</a> ，写的非常详细，也参考了不少这篇文章的内容。</p>
+</blockquote>
+<p><strong>我的传送门：</strong> <a href="https://karise.cn/">博客</a> 、<a target="_blank" rel="noopener" href="https://jianshu.com/u/63659e722f3b">简书</a> 、<a target="_blank" rel="noopener" href="https://weibo.com/karise">微博</a> 、<a target="_blank" rel="noopener" href="https://github.com/karise-guo">GitHub</a> 。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="爱吃鸭梨的猫 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="爱吃鸭梨的猫 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>爱吃鸭梨的猫
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://karise.cn/2017/07/21/iOS/201707211728/" title="【iOS 开发】Realm Swift 数据库使用汇总">https://karise.cn/2017/07/21/iOS/201707211728/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/iOS-%E5%BC%80%E5%8F%91/" rel="tag"># iOS 开发</a>
+              <a href="/tags/Swift/" rel="tag"># Swift</a>
+              <a href="/tags/Realm/" rel="tag"># Realm</a>
+              <a href="/tags/RealmSwift/" rel="tag"># RealmSwift</a>
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag"># 数据库</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/07/17/iOS/201707171542/" rel="prev" title="【iOS 开发】Swift 把 Struct 作为数据模型的注意事项">
+      <i class="fa fa-chevron-left"></i> 【iOS 开发】Swift 把 Struct 作为数据模型的注意事项
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/08/10/iOS/201708101503/" rel="next" title="【iOS 开发】Objective-C 中 Charts 的 CombinedChart 使用汇总">
+      【iOS 开发】Objective-C 中 Charts 的 CombinedChart 使用汇总 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Realm-%E7%9A%84%E4%BC%98%E7%82%B9"><span class="nav-text">Realm 的优点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Realm-Swift-%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-text">Realm Swift 的安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Realm-Browser-%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-text">Realm Browser 的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%A8%A1%E6%8B%9F%E5%99%A8%E8%B0%83%E8%AF%95"><span class="nav-text">1. 模拟器调试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%9C%9F%E6%9C%BA%E8%B0%83%E8%AF%95"><span class="nav-text">2. 真机调试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Realm-Swift-%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-text">Realm Swift 的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E9%85%8D%E7%BD%AE-Realm-%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="nav-text">1. 配置 Realm 数据库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Model-%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B"><span class="nav-text">2. Model 数据模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Realm-%E6%94%AF%E6%8C%81%E7%9A%84%E5%B1%9E%E6%80%A7%E7%B1%BB"><span class="nav-text">Realm 支持的属性类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Model-%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B%E5%88%9B%E5%BB%BA"><span class="nav-text">Model 数据模型创建</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%99%AE%E9%80%9A%E7%9A%84%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B"><span class="nav-text">普通的数据模型</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B3%E7%B3%BB%E7%BB%91%E5%AE%9A"><span class="nav-text">关系绑定</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%8D%E5%90%91%E5%85%B3%E7%B3%BB"><span class="nav-text">反向关系</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E5%B1%9E%E6%80%A7%EF%BC%88Indexed-Properties%EF%BC%89"><span class="nav-text">索引属性（Indexed Properties）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%BB%E9%94%AE%EF%BC%88Primary-Keys%EF%BC%89"><span class="nav-text">主键（Primary Keys）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BF%BD%E7%95%A5%E5%B1%9E%E6%80%A7%EF%BC%88Ignored-Properties%EF%BC%89"><span class="nav-text">忽略属性（Ignored Properties）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%88%9B%E5%BB%BA%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B%E5%AF%B9%E8%B1%A1"><span class="nav-text">3. 创建数据模型对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%95%B0%E6%8D%AE%E5%BA%93%E6%93%8D%E4%BD%9C%EF%BC%88%E5%A2%9E%E5%88%A0%E6%94%B9%E6%9F%A5%EF%BC%89"><span class="nav-text">4. 数据库操作（增删改查）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A2%9E%E5%8A%A0%E6%95%B0%E6%8D%AE"><span class="nav-text">增加数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E6%95%B0%E6%8D%AE"><span class="nav-text">删除数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE"><span class="nav-text">修改数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2%E6%95%B0%E6%8D%AE"><span class="nav-text">查询数据</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="爱吃鸭梨的猫"
+      src="/images/cat.jpg">
+  <p class="site-author-name" itemprop="name">爱吃鸭梨的猫</p>
+  <div class="site-description" itemprop="description">创造财富 才是时间最正确的归宿</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">76</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">119</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/karise" title="微博 → http:&#x2F;&#x2F;weibo.com&#x2F;karise" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>微博</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:292710547@qq.com" title="邮箱 → mailto:292710547@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>邮箱</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.jianshu.com/u/63659e722f3b" title="简书 → http:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;63659e722f3b" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/karise-guo" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;karise-guo" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heartbeat"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱吃鸭梨的猫</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+  <div style="display: none;">
+    <script data-pjax src="//s95.cnzz.com/z_stat.php?id=1262401548&web_id=1262401548"></script>
+  </div>
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/npm/algoliasearch@4/dist/algoliasearch-lite.umd.js"></script>
+<script src="//cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
+<script src="/js/algolia-search.js"></script>
+
+
+
+
+
+
+
+  <script src="//code.tidio.co/koavrszo8ljadwqznhu3xloogrgfg7gt.js"></script>
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '96fe4c8974d2415f9fc0',
+      clientSecret: 'ece2551d6a09bfe9f9421ac6e85f1472daf6122c',
+      repo        : 'BlogComment',
+      owner       : 'karise-guo',
+      admin       : ['karise-guo'],
+      id          : '8bb7da54a5ec3d669fe258e88c0ae7f9',
+        language: 'zh-CN',
+      distractionFreeMode: false
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+    </div>
+</body>
+</html>

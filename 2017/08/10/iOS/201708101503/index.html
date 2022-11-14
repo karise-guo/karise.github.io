@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/cat.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/cat.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/cat.jpg">
+  <link rel="mask-icon" href="/images/cat.jpg" color="#222">
+  <meta name="google-site-verification" content="6FbWia2UHu0Rj0-k91-sJlCX_0u5twNvlB9Nha097oc">
+  <meta name="baidu-site-verification" content="fecPuO9wLA">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"karise.cn","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"appID":"6R1TPR58SX","apiKey":"b7b85229dc744164111c058bfea5448c","indexName":"Karise","hits":{"per_page":10},"labels":{"input_placeholder":"请输入搜索内容...","hits_empty":"没有搜索到关于 “${query}” 的任何内容。","hits_stats":"一共搜索到 ${hits} 个结果，使用了 ${time} 毫秒。"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="最近公司项目中要做一个报表功能，需要用到图表，于是就使用了 Charts 这个框架，这个框架可以说是图表中用的最多的框架了，由于 Charts 只有 Swift 版本，公司项目是用 OC 写的，所以先整理一下 OC 的使用方法，Swift 等以后项目转了在整理。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【iOS 开发】Objective-C 中 Charts 的 CombinedChart 使用汇总">
+<meta property="og:url" content="https://karise.cn/2017/08/10/iOS/201708101503/index.html">
+<meta property="og:site_name" content="爱吃鸭梨的猫">
+<meta property="og:description" content="最近公司项目中要做一个报表功能，需要用到图表，于是就使用了 Charts 这个框架，这个框架可以说是图表中用的最多的框架了，由于 Charts 只有 Swift 版本，公司项目是用 OC 写的，所以先整理一下 OC 的使用方法，Swift 等以后项目转了在整理。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://file.karise.cn/blog/57366872-73abb780-71ba-11e9-829f-16a301c4d83b.png">
+<meta property="article:published_time" content="2017-08-10T07:03:54.000Z">
+<meta property="article:modified_time" content="2022-11-11T09:44:54.937Z">
+<meta property="article:author" content="爱吃鸭梨的猫">
+<meta property="article:tag" content="iOS 开发">
+<meta property="article:tag" content="Charts">
+<meta property="article:tag" content="CombinedChart">
+<meta property="article:tag" content="BarChart">
+<meta property="article:tag" content="LineChart">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://file.karise.cn/blog/57366872-73abb780-71ba-11e9-829f-16a301c4d83b.png">
+
+<link rel="canonical" href="https://karise.cn/2017/08/10/iOS/201708101503/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【iOS 开发】Objective-C 中 Charts 的 CombinedChart 使用汇总 | 爱吃鸭梨的猫</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-101397377-1"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-101397377-1');
+      }
+    </script>
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?23e551cb7374b653d003004a84ced259";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="爱吃鸭梨的猫" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta custom-logo">
+      <div class="site-meta-headline">
+        <a>
+          <img class="custom-logo-image" src="/images/cat.jpg" alt="爱吃鸭梨的猫">
+        </a>
+      </div>
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">爱吃鸭梨的猫</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">创造财富 才是时间最正确的归宿</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>博客首页</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/catalog/" rel="section"><i class="fa fa-fw fa-list-ul"></i>博文目录</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-folder-open"></i>文章分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-cloud"></i>标签云集</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-hourglass-half"></i>我的历程</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/message/" rel="section"><i class="fa fa-fw fa-commenting"></i>给我留言</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于博主</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索文章
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="algolia-results">
+  <div id="algolia-stats"></div>
+  <div id="algolia-hits"></div>
+  <div id="algolia-pagination" class="algolia-pagination"></div>
+</div>
+
+      
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://karise.cn/2017/08/10/iOS/201708101503/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/cat.jpg">
+      <meta itemprop="name" content="爱吃鸭梨的猫">
+      <meta itemprop="description" content="创造财富 才是时间最正确的归宿">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="爱吃鸭梨的猫">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【iOS 开发】Objective-C 中 Charts 的 CombinedChart 使用汇总
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-08-10 15:03:54" itemprop="dateCreated datePublished" datetime="2017-08-10T15:03:54+08:00">2017-08-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-11-11 17:44:54" itemprop="dateModified" datetime="2022-11-11T17:44:54+08:00">2022-11-11</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS-%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">iOS 开发</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+            <img src="https://file.karise.cn/blog/57366872-73abb780-71ba-11e9-829f-16a301c4d83b.png" itemprop="contentUrl">
+        </div>
+        <blockquote>
+<p>最近公司项目中要做一个报表功能，需要用到图表，于是就使用了 <a target="_blank" rel="noopener" href="https://github.com/danielgindi/Charts">Charts</a> 这个框架，这个框架可以说是图表中用的最多的框架了，由于 <code>Charts</code> 只有 <code>Swift</code> 版本，公司项目是用 <code>OC</code> 写的，所以先整理一下 <code>OC</code> 的使用方法，<code>Swift</code> 等以后项目转了在整理。</p>
+</blockquote>
+<a id="more"></a>
+
+<hr>
+<h2 id="1-创建-CombinedChartView-并设置属性"><a href="#1-创建-CombinedChartView-并设置属性" class="headerlink" title="1. 创建 CombinedChartView 并设置属性"></a>1. 创建 CombinedChartView 并设置属性</h2><p>下面列出一些常用的设置属性，可以根据需求自行设置。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">CombinedChartViewController</span>()</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) CombinedChartView *combinedChartView; <span class="comment">// 柱状折线组合图</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">CombinedChartViewController</span></span></span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)viewDidLoad &#123;</span><br><span class="line">    [<span class="keyword">super</span> viewDidLoad];</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 设置图表的属性 */</span></span><br><span class="line">    _combinedChartView = [[CombinedChartView alloc] initWithFrame:<span class="built_in">CGRectMake</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="keyword">self</span>.view.frame.size.width, <span class="number">350</span>)];</span><br><span class="line">    _combinedChartView.drawOrder = @[@(CombinedChartDrawOrderBar), @(CombinedChartDrawOrderLine)]; <span class="comment">// 绘制顺序（折线图在柱状图上面）</span></span><br><span class="line">    _combinedChartView.noDataText = <span class="string">@&quot;暂无数据&quot;</span>; <span class="comment">// 无数据时显示的文字</span></span><br><span class="line">    _combinedChartView.descriptionText = <span class="string">@&quot;&quot;</span>; <span class="comment">// 描述文字</span></span><br><span class="line">    _combinedChartView.legend.enabled = <span class="literal">NO</span>; <span class="comment">// 隐藏图例</span></span><br><span class="line">    _combinedChartView.pinchZoomEnabled = <span class="literal">NO</span>; <span class="comment">// 触控放大</span></span><br><span class="line">    _combinedChartView.doubleTapToZoomEnabled = <span class="literal">NO</span>; <span class="comment">// 双击放大</span></span><br><span class="line">    _combinedChartView.scaleXEnabled = <span class="literal">NO</span>; <span class="comment">// X 轴缩放</span></span><br><span class="line">    _combinedChartView.scaleYEnabled = <span class="literal">NO</span>; <span class="comment">// Y 轴缩放</span></span><br><span class="line">    _combinedChartView.scaleEnabled = <span class="literal">NO</span>; <span class="comment">// 缩放</span></span><br><span class="line">    _combinedChartView.highlightPerTapEnabled = <span class="literal">NO</span>; <span class="comment">// 单击高亮</span></span><br><span class="line">    _combinedChartView.highlightPerDragEnabled = <span class="literal">NO</span>; <span class="comment">// 拖拽高亮</span></span><br><span class="line">    _combinedChartView.dragEnabled = <span class="literal">YES</span>; <span class="comment">// 拖拽图表</span></span><br><span class="line">    _combinedChartView.dragDecelerationEnabled = <span class="literal">YES</span>; <span class="comment">// 拖拽后是否有惯性效果</span></span><br><span class="line">    _combinedChartView.dragDecelerationFrictionCoef = <span class="number">0.5</span>; <span class="comment">// 拖拽后惯性效果的摩擦系数(0~1)，数值越小，惯性越不明显</span></span><br><span class="line">    [<span class="keyword">self</span>.view addSubview:_combinedChartView];</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 设置 X 轴显示的值的属性 */</span></span><br><span class="line">    ChartXAxis *xAxis = _combinedChartView.xAxis;</span><br><span class="line">    xAxis.labelPosition = XAxisLabelPositionBottom; <span class="comment">// 显示位置</span></span><br><span class="line">    xAxis.drawGridLinesEnabled = <span class="literal">NO</span>; <span class="comment">// 网格绘制</span></span><br><span class="line">    xAxis.axisLineColor = [<span class="built_in">UIColor</span> lightGrayColor]; <span class="comment">// X 轴颜色</span></span><br><span class="line">    xAxis.axisLineWidth = <span class="number">0.5</span>f; <span class="comment">// X 轴线宽</span></span><br><span class="line">    xAxis.labelFont = [<span class="built_in">UIFont</span> systemFontOfSize:<span class="number">10</span>]; <span class="comment">// 字号</span></span><br><span class="line">    xAxis.labelTextColor = [<span class="built_in">UIColor</span> lightGrayColor]; <span class="comment">// 颜色</span></span><br><span class="line">    xAxis.labelRotationAngle = <span class="number">30</span>; <span class="comment">// 文字倾斜角度</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 设置左侧 Y 轴显示的值的属性 */</span></span><br><span class="line">    ChartYAxis *leftAxis = _combinedChartView.leftAxis;</span><br><span class="line">    leftAxis.labelPosition = YAxisLabelPositionOutsideChart; <span class="comment">// 显示位置</span></span><br><span class="line">    leftAxis.drawGridLinesEnabled = <span class="literal">YES</span>; <span class="comment">// 网格绘制</span></span><br><span class="line">    leftAxis.gridColor = [<span class="built_in">UIColor</span> lightGrayColor]; <span class="comment">// 网格颜色</span></span><br><span class="line">    leftAxis.gridLineWidth = <span class="number">0.5</span>f; <span class="comment">// 网格线宽</span></span><br><span class="line">    leftAxis.drawAxisLineEnabled = <span class="literal">NO</span>; <span class="comment">// 是否显示轴线</span></span><br><span class="line">    leftAxis.labelFont = [<span class="built_in">UIFont</span> systemFontOfSize:<span class="number">10</span>]; <span class="comment">// 字号</span></span><br><span class="line">    leftAxis.labelTextColor = [<span class="built_in">UIColor</span> lightGrayColor]; <span class="comment">// 颜色</span></span><br><span class="line">    leftAxis.axisMinimum = <span class="number">0</span>; <span class="comment">// 最小值</span></span><br><span class="line">    leftAxis.axisMaximum = <span class="number">500</span>; <span class="comment">// 最大值（不设置会根据数据自动设置）</span></span><br><span class="line">    [leftAxis setLabelCount:<span class="number">6</span> force:<span class="literal">YES</span>]; <span class="comment">// Y 轴段数（会自动分成对应段数）</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 设置右侧 Y 轴显示的值的属性 */</span></span><br><span class="line">    ChartYAxis *rightAxis = _combinedChartView.rightAxis;</span><br><span class="line">    rightAxis.labelPosition = YAxisLabelPositionOutsideChart; <span class="comment">// 显示位置</span></span><br><span class="line">    rightAxis.drawGridLinesEnabled = <span class="literal">NO</span>; <span class="comment">// 网格绘制</span></span><br><span class="line">    rightAxis.drawAxisLineEnabled = <span class="literal">NO</span>; <span class="comment">// 是否显示轴线</span></span><br><span class="line">    rightAxis.labelFont = [<span class="built_in">UIFont</span> systemFontOfSize:<span class="number">10</span>]; <span class="comment">// 字号</span></span><br><span class="line">    rightAxis.labelTextColor = [<span class="built_in">UIColor</span> lightGrayColor]; <span class="comment">// 颜色</span></span><br><span class="line">    rightAxis.axisMinimum = <span class="number">0</span>; <span class="comment">// 最小值</span></span><br><span class="line">    rightAxis.axisMaximum = <span class="number">100</span>; <span class="comment">// 最大值（不设置会根据数据自动设置）</span></span><br><span class="line">    [rightAxis setLabelCount:<span class="number">6</span> force:<span class="literal">YES</span>]; <span class="comment">// Y 轴段数（会自动分成对应段数）</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="2-设置柱状图属性"><a href="#2-设置柱状图属性" class="headerlink" title="2. 设置柱状图属性"></a>2. 设置柱状图属性</h2><p>下面将设置柱状图属性与数据进行了封装。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> 柱状图的数据</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> @param bar1Values 第一段的数据</span></span><br><span class="line"><span class="comment"> @param bar2Values 第二段的数据</span></span><br><span class="line"><span class="comment"> @return 柱状图的数据</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">- (BarChartData *)getBarData:(<span class="built_in">NSArray</span> *)bar1Values bar2Values:(<span class="built_in">NSArray</span> *)bar2Values &#123;</span><br><span class="line">    <span class="built_in">NSMutableArray</span> *barEntries = [<span class="built_in">NSMutableArray</span> array];</span><br><span class="line">    <span class="keyword">if</span> (bar1Values.count == bar2Values.count) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;bar1Values.count; i++) &#123;</span><br><span class="line">            BarChartDataEntry *barEntry = [[BarChartDataEntry alloc] initWithX:i yValues:@[bar1Values[i], bar2Values[i]]];</span><br><span class="line">            [barEntries addObject:barEntry];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    BarChartDataSet *dataSet = [[BarChartDataSet alloc] initWithValues:barEntries];</span><br><span class="line">    dataSet.colors = @[[<span class="built_in">UIColor</span> greenColor], [<span class="built_in">UIColor</span> blueColor]];</span><br><span class="line">    dataSet.axisDependency = AxisDependencyLeft; <span class="comment">// 根据左边数据显示</span></span><br><span class="line">    dataSet.drawValuesEnabled = <span class="literal">NO</span>; <span class="comment">// 是否显示数据</span></span><br><span class="line">    BarChartData *data = [[BarChartData alloc] initWithDataSets:@[dataSet]];</span><br><span class="line">    data.barWidth = <span class="number">0.55</span>f; <span class="comment">// 柱状图宽度（数值范围 0 ~ 1）</span></span><br><span class="line">    <span class="keyword">return</span> data;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-设置折线图属性"><a href="#3-设置折线图属性" class="headerlink" title="3. 设置折线图属性"></a>3. 设置折线图属性</h2><p>下面将设置折线图属性与数据进行了封装。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> 获取折线图的数据</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> @param lineValues 数据放入数组 NSNumber 类型</span></span><br><span class="line"><span class="comment"> @return 折线图的数据</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">- (LineChartData *)getLineData:(<span class="built_in">NSArray</span> *)lineValues &#123;</span><br><span class="line">    <span class="built_in">NSMutableArray</span> *entries = [<span class="built_in">NSMutableArray</span> array];</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; lineValues.count; i++) &#123;</span><br><span class="line">        ChartDataEntry *entry = [[ChartDataEntry alloc] initWithX:i y:[lineValues[i] floatValue]];</span><br><span class="line">        [entries addObject:entry];</span><br><span class="line">    &#125;</span><br><span class="line">    LineChartDataSet *dataSet = [[LineChartDataSet alloc] initWithValues:entries];</span><br><span class="line">    dataSet.colors = @[[<span class="built_in">UIColor</span> orangeColor]]; <span class="comment">// 线的颜色</span></span><br><span class="line">    dataSet.lineWidth = <span class="number">0.5</span>f; <span class="comment">// 线宽</span></span><br><span class="line">    dataSet.circleRadius = <span class="number">2.5</span>f; <span class="comment">// 圆点外圆半径</span></span><br><span class="line">    dataSet.circleHoleRadius = <span class="number">1.5</span>f; <span class="comment">// 圆点内圆半径</span></span><br><span class="line">    dataSet.circleColors = @[[<span class="built_in">UIColor</span> orangeColor]]; <span class="comment">// 圆点外圆颜色</span></span><br><span class="line">    dataSet.circleHoleColor = [<span class="built_in">UIColor</span> whiteColor]; <span class="comment">// 圆点内圆颜色</span></span><br><span class="line">    dataSet.axisDependency = AxisDependencyRight; <span class="comment">// 根据右边数据显示</span></span><br><span class="line">    dataSet.drawValuesEnabled = <span class="literal">NO</span>; <span class="comment">// 是否显示数据</span></span><br><span class="line">    dataSet.mode = LineChartModeCubicBezier; <span class="comment">// 折线图类型</span></span><br><span class="line">    dataSet.drawFilledEnabled = <span class="literal">YES</span>; <span class="comment">// 是否显示折线图阴影</span></span><br><span class="line">    <span class="built_in">NSArray</span> *shadowColors = @[(<span class="keyword">id</span>)[[<span class="built_in">UIColor</span> orangeColor] colorWithAlphaComponent:<span class="number">0</span>].CGColor, (<span class="keyword">id</span>)[[<span class="built_in">UIColor</span> orangeColor] colorWithAlphaComponent:<span class="number">0.7</span>].CGColor];</span><br><span class="line">    <span class="built_in">CGGradientRef</span> gradient = <span class="built_in">CGGradientCreateWithColors</span>(<span class="literal">nil</span>, (<span class="built_in">CFArrayRef</span>)shadowColors, <span class="literal">nil</span>);</span><br><span class="line">    dataSet.fill = [ChartFill fillWithLinearGradient:gradient angle:<span class="number">90.0</span>f]; <span class="comment">// 阴影渐变效果</span></span><br><span class="line">    dataSet.fillAlpha = <span class="number">1.0</span>f; <span class="comment">// 阴影透明度</span></span><br><span class="line">    LineChartData *lineData = [[LineChartData alloc] initWithDataSet:dataSet];</span><br><span class="line">    <span class="keyword">return</span> lineData;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-设置图表数据"><a href="#4-设置图表数据" class="headerlink" title="4. 设置图表数据"></a>4. 设置图表数据</h2><p>最后通过以下方法就能够设置整个图表的数据。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> 设置混合图表的数据</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> @param xValues X 轴的数据</span></span><br><span class="line"><span class="comment"> @param bar1Values 柱状图数据1</span></span><br><span class="line"><span class="comment"> @param bar2Values 柱状图数据2</span></span><br><span class="line"><span class="comment"> @param lineValues 折线图数据</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">- (<span class="keyword">void</span>)setXValues:(<span class="built_in">NSArray</span> *)xValues</span><br><span class="line">        bar1Values:(<span class="built_in">NSArray</span> *)bar1Values</span><br><span class="line">        bar2Values:(<span class="built_in">NSArray</span> *)bar2Values</span><br><span class="line">        lineValues:(<span class="built_in">NSArray</span> *)lineValues &#123;</span><br><span class="line">    CombinedChartData *data = [[CombinedChartData alloc] init];</span><br><span class="line">    data.barData = [<span class="keyword">self</span> getBarData:bar1Values bar2Values:bar2Values]; <span class="comment">// 柱状图数据</span></span><br><span class="line">    data.lineData = [<span class="keyword">self</span> getLineData:lineValues]; <span class="comment">// 折线图数据</span></span><br><span class="line">    [_combinedChartView setData:data]; <span class="comment">// 图表数据</span></span><br><span class="line">    ChartXAxis *xAxis = _combinedChartView.xAxis;</span><br><span class="line">    xAxis.axisMinimum = data.xMin - <span class="number">0.5</span>f; <span class="comment">// X 轴最小数量</span></span><br><span class="line">    xAxis.axisMaximum = data.xMax + <span class="number">0.5</span>f; <span class="comment">// X 轴最大数量</span></span><br><span class="line">    xAxis.valueFormatter = [[ChartIndexAxisValueFormatter alloc] initWithValues:xValues]; <span class="comment">// X 轴数据</span></span><br><span class="line">    [_combinedChartView setVisibleXRangeMaximum:<span class="number">7</span>]; <span class="comment">// X 轴最多显示数量（其余可滑动显示）</span></span><br><span class="line">    [_combinedChartView animateWithYAxisDuration:<span class="number">1.0</span>]; <span class="comment">// 添加 Y 轴动画</span></span><br><span class="line">    [_combinedChartView notifyDataSetChanged]; <span class="comment">// 通知数据改变</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>另外这里有一个坑，在设置 <code>X</code> 轴属性的时候，有个属性是 <code>xAxis.labelWidth</code> ，由于图表好像是自动计算 <code>label</code> 大小的，设置这个属性根本没有任何作用，所以就导致当 <code>X</code> 轴数据文字过长时，就全部挤在一块了，为了解决这个问题，可以在设置 <code>xAxis.valueFormatter</code> 的时候自定义一个 <code>valueFormatter</code> 来设定指定宽度截取，下面是我的自定义。</p>
+<p><strong>CustomAxisValueFormatter.h</strong></p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">CustomAxisValueFormatter</span> : <span class="title">NSObject</span> &lt;<span class="title">IChartAxisValueFormatter</span>&gt;</span></span><br><span class="line"></span><br><span class="line">- (<span class="keyword">instancetype</span>)initWithValues:(<span class="built_in">NSArray</span> *)values labelWidth:(<span class="built_in">CGFloat</span>)labelWidth;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>CustomAxisValueFormatter.m</strong></p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">CustomAxisValueFormatter</span> ()</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="built_in">NSArray</span> *values;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">assign</span>) <span class="built_in">CGFloat</span> labelWidth;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">CustomAxisValueFormatter</span></span></span><br><span class="line"></span><br><span class="line">- (<span class="keyword">instancetype</span>)initWithValues:(<span class="built_in">NSArray</span> *)values labelWidth:(<span class="built_in">CGFloat</span>)labelWidth &#123;</span><br><span class="line">    <span class="keyword">self</span> = [<span class="keyword">super</span> init];</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">self</span>) &#123;</span><br><span class="line">        _values = values;</span><br><span class="line">        _labelWidth = labelWidth;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">NSString</span> *)stringForValue:(<span class="keyword">double</span>)value axis:(ChartAxisBase *)axis &#123;</span><br><span class="line">    <span class="built_in">NSString</span> *result = <span class="string">@&quot;&quot;</span>; <span class="comment">// 根据设置的字符宽度自动截取字符长度</span></span><br><span class="line">    <span class="built_in">NSInteger</span> index = @(value).integerValue;</span><br><span class="line">    <span class="keyword">if</span> (index &lt; _values.count) &#123;</span><br><span class="line">        result = _values[index];</span><br><span class="line">        <span class="keyword">if</span> (_labelWidth &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="built_in">UILabel</span> *label = [[<span class="built_in">UILabel</span> alloc] init];</span><br><span class="line">            label.font = [<span class="built_in">UIFont</span> systemFontOfSize:<span class="number">10</span>]; <span class="comment">// 这里和 X 轴文字字号设置一样大</span></span><br><span class="line">            label.text = result;</span><br><span class="line">            <span class="keyword">while</span> ([label sizeThatFits:<span class="built_in">CGSizeMake</span>(MAXFLOAT, MAXFLOAT)].width &gt; _labelWidth) &#123;</span><br><span class="line">                result = [result substringToIndex:result.length - <span class="number">1</span>];</span><br><span class="line">                label.text = [<span class="built_in">NSString</span> stringWithFormat:<span class="string">@&quot;%@...&quot;</span>, result];</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> label.text;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<p>这是之前设置 <code>xAxis.valueFormatter</code> 的方法。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">xAxis.valueFormatter = [[ChartIndexAxisValueFormatter alloc] initWithValues:xValues];</span><br></pre></td></tr></table></figure>
+
+<p>改为自定义的方法。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">xAxis.valueFormatter = [[CustomAxisValueFormatter alloc] initWithValues:xValues labelWidth:<span class="number">40</span>];</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-设置数据方法"><a href="#5-设置数据方法" class="headerlink" title="5. 设置数据方法"></a>5. 设置数据方法</h2><p>图表的数据全部放入数组中，数字用 <code>NSNumber</code> 类型。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">[<span class="keyword">self</span> setXValues:@[<span class="string">@&quot;X轴数据1&quot;</span>, <span class="string">@&quot;X轴数据2&quot;</span>, <span class="string">@&quot;X轴数据3&quot;</span>] bar1Values:@[<span class="string">@&quot;10&quot;</span>, <span class="string">@&quot;20&quot;</span>, <span class="string">@&quot;30&quot;</span>] bar2Values:@[<span class="string">@&quot;30&quot;</span>, <span class="string">@&quot;20&quot;</span>, <span class="string">@&quot;10&quot;</span>] lineValues:@[<span class="string">@&quot;40&quot;</span>, <span class="string">@&quot;50&quot;</span>, <span class="string">@&quot;60&quot;</span>]];</span><br></pre></td></tr></table></figure>
+
+<p>下面是我们项目做出来的显示效果：</p>
+<p><img data-src="https://file.karise.cn/blog/20190509163350.png" alt="图表显示效果"></p>
+<hr>
+<blockquote>
+<p>其实 <code>CombinedChartView</code> 混合图表只是将 <code>BarChartView</code> 柱状图和 <code>LineChartView</code> 折线图合在一起了，设置还是分开设置的，所以不管是柱状图还是折线图，都可以参照上面来设置。</p>
+</blockquote>
+<p><strong>我的传送门：</strong> <a href="https://karise.cn/">博客</a> 、<a target="_blank" rel="noopener" href="https://jianshu.com/u/63659e722f3b">简书</a> 、<a target="_blank" rel="noopener" href="https://weibo.com/karise">微博</a> 、<a target="_blank" rel="noopener" href="https://github.com/karise-guo">GitHub</a> 。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="爱吃鸭梨的猫 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="爱吃鸭梨的猫 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>爱吃鸭梨的猫
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://karise.cn/2017/08/10/iOS/201708101503/" title="【iOS 开发】Objective-C 中 Charts 的 CombinedChart 使用汇总">https://karise.cn/2017/08/10/iOS/201708101503/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/iOS-%E5%BC%80%E5%8F%91/" rel="tag"># iOS 开发</a>
+              <a href="/tags/Charts/" rel="tag"># Charts</a>
+              <a href="/tags/CombinedChart/" rel="tag"># CombinedChart</a>
+              <a href="/tags/BarChart/" rel="tag"># BarChart</a>
+              <a href="/tags/LineChart/" rel="tag"># LineChart</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/07/21/iOS/201707211728/" rel="prev" title="【iOS 开发】Realm Swift 数据库使用汇总">
+      <i class="fa fa-chevron-left"></i> 【iOS 开发】Realm Swift 数据库使用汇总
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/08/10/Other/201708101829/" rel="next" title="使用 fds 来 mock 模拟 http 接口数据的方法">
+      使用 fds 来 mock 模拟 http 接口数据的方法 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%88%9B%E5%BB%BA-CombinedChartView-%E5%B9%B6%E8%AE%BE%E7%BD%AE%E5%B1%9E%E6%80%A7"><span class="nav-text">1. 创建 CombinedChartView 并设置属性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E8%AE%BE%E7%BD%AE%E6%9F%B1%E7%8A%B6%E5%9B%BE%E5%B1%9E%E6%80%A7"><span class="nav-text">2. 设置柱状图属性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E8%AE%BE%E7%BD%AE%E6%8A%98%E7%BA%BF%E5%9B%BE%E5%B1%9E%E6%80%A7"><span class="nav-text">3. 设置折线图属性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E8%AE%BE%E7%BD%AE%E5%9B%BE%E8%A1%A8%E6%95%B0%E6%8D%AE"><span class="nav-text">4. 设置图表数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E8%AE%BE%E7%BD%AE%E6%95%B0%E6%8D%AE%E6%96%B9%E6%B3%95"><span class="nav-text">5. 设置数据方法</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="爱吃鸭梨的猫"
+      src="/images/cat.jpg">
+  <p class="site-author-name" itemprop="name">爱吃鸭梨的猫</p>
+  <div class="site-description" itemprop="description">创造财富 才是时间最正确的归宿</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">76</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">119</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/karise" title="微博 → http:&#x2F;&#x2F;weibo.com&#x2F;karise" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>微博</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:292710547@qq.com" title="邮箱 → mailto:292710547@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>邮箱</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.jianshu.com/u/63659e722f3b" title="简书 → http:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;63659e722f3b" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/karise-guo" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;karise-guo" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heartbeat"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱吃鸭梨的猫</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+  <div style="display: none;">
+    <script data-pjax src="//s95.cnzz.com/z_stat.php?id=1262401548&web_id=1262401548"></script>
+  </div>
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/npm/algoliasearch@4/dist/algoliasearch-lite.umd.js"></script>
+<script src="//cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
+<script src="/js/algolia-search.js"></script>
+
+
+
+
+
+
+
+  <script src="//code.tidio.co/koavrszo8ljadwqznhu3xloogrgfg7gt.js"></script>
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '96fe4c8974d2415f9fc0',
+      clientSecret: 'ece2551d6a09bfe9f9421ac6e85f1472daf6122c',
+      repo        : 'BlogComment',
+      owner       : 'karise-guo',
+      admin       : ['karise-guo'],
+      id          : 'ff3f101b5b7922e5ecf761685cb7bc50',
+        language: 'zh-CN',
+      distractionFreeMode: false
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+    </div>
+</body>
+</html>

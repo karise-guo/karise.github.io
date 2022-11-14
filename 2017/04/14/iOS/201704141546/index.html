@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/cat.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/cat.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/cat.jpg">
+  <link rel="mask-icon" href="/images/cat.jpg" color="#222">
+  <meta name="google-site-verification" content="6FbWia2UHu0Rj0-k91-sJlCX_0u5twNvlB9Nha097oc">
+  <meta name="baidu-site-verification" content="fecPuO9wLA">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"karise.cn","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"appID":"6R1TPR58SX","apiKey":"b7b85229dc744164111c058bfea5448c","indexName":"Karise","hits":{"per_page":10},"labels":{"input_placeholder":"请输入搜索内容...","hits_empty":"没有搜索到关于 “${query}” 的任何内容。","hits_stats":"一共搜索到 ${hits} 个结果，使用了 ${time} 毫秒。"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="最近想将自己写的框架支持 CocoaPods 集成，弄了好久，遇到了不少坑，所以想把方法记录下来，希望可以帮助大家少走一些坑，包括私有库的创建以及私有库依赖私有库的坑都已经写在下面了。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【iOS 开发】创建 podspec 文件，给自己写的框架添加 CocoaPos 支持">
+<meta property="og:url" content="https://karise.cn/2017/04/14/iOS/201704141546/index.html">
+<meta property="og:site_name" content="爱吃鸭梨的猫">
+<meta property="og:description" content="最近想将自己写的框架支持 CocoaPods 集成，弄了好久，遇到了不少坑，所以想把方法记录下来，希望可以帮助大家少走一些坑，包括私有库的创建以及私有库依赖私有库的坑都已经写在下面了。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://file.karise.cn/blog/57366247-2a0e9d00-71b9-11e9-8f58-fa00af876cc3.jpg">
+<meta property="article:published_time" content="2017-04-14T07:46:00.000Z">
+<meta property="article:modified_time" content="2022-11-11T09:44:54.933Z">
+<meta property="article:author" content="爱吃鸭梨的猫">
+<meta property="article:tag" content="iOS 开发">
+<meta property="article:tag" content="CocoaPods">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://file.karise.cn/blog/57366247-2a0e9d00-71b9-11e9-8f58-fa00af876cc3.jpg">
+
+<link rel="canonical" href="https://karise.cn/2017/04/14/iOS/201704141546/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【iOS 开发】创建 podspec 文件，给自己写的框架添加 CocoaPos 支持 | 爱吃鸭梨的猫</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-101397377-1"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-101397377-1');
+      }
+    </script>
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?23e551cb7374b653d003004a84ced259";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="爱吃鸭梨的猫" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta custom-logo">
+      <div class="site-meta-headline">
+        <a>
+          <img class="custom-logo-image" src="/images/cat.jpg" alt="爱吃鸭梨的猫">
+        </a>
+      </div>
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">爱吃鸭梨的猫</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">创造财富 才是时间最正确的归宿</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>博客首页</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/catalog/" rel="section"><i class="fa fa-fw fa-list-ul"></i>博文目录</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-folder-open"></i>文章分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-cloud"></i>标签云集</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-hourglass-half"></i>我的历程</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/message/" rel="section"><i class="fa fa-fw fa-commenting"></i>给我留言</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于博主</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索文章
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="algolia-results">
+  <div id="algolia-stats"></div>
+  <div id="algolia-hits"></div>
+  <div id="algolia-pagination" class="algolia-pagination"></div>
+</div>
+
+      
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://karise.cn/2017/04/14/iOS/201704141546/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/cat.jpg">
+      <meta itemprop="name" content="爱吃鸭梨的猫">
+      <meta itemprop="description" content="创造财富 才是时间最正确的归宿">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="爱吃鸭梨的猫">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【iOS 开发】创建 podspec 文件，给自己写的框架添加 CocoaPos 支持
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-04-14 15:46:00" itemprop="dateCreated datePublished" datetime="2017-04-14T15:46:00+08:00">2017-04-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-11-11 17:44:54" itemprop="dateModified" datetime="2022-11-11T17:44:54+08:00">2022-11-11</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS-%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">iOS 开发</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+            <img src="https://file.karise.cn/blog/57366247-2a0e9d00-71b9-11e9-8f58-fa00af876cc3.jpg" itemprop="contentUrl">
+        </div>
+        <blockquote>
+<p>最近想将自己写的框架支持 <code>CocoaPods</code> 集成，弄了好久，遇到了不少坑，所以想把方法记录下来，希望可以帮助大家少走一些坑，包括私有库的创建以及私有库依赖私有库的坑都已经写在下面了。</p>
+</blockquote>
+<a id="more"></a>
+
+<hr>
+<h2 id="1-将框架源码提交到-GitHub"><a href="#1-将框架源码提交到-GitHub" class="headerlink" title="1. 将框架源码提交到 GitHub"></a>1. 将框架源码提交到 GitHub</h2><p>想要添加 <code>CocoaPods</code> 支持必须将源码提交至 <code>GitHub</code> ，至于怎么提交相信大家都会，就不重复了。</p>
+<p><strong>注意：</strong>在创建 <code>GitHub</code> 仓库的时候，下面的 <code>License 许可证</code> 必须选择 <code>MIT License</code> ，不能为 <code>None</code> ，否则验证会报错，在下面会用到。</p>
+<p><img data-src="https://file.karise.cn/blog/20190509160507.png" alt="MIT License"></p>
+<p>下图是我的项目目录结构，上面选择了 <code>MIT License</code> 后，项目目录中会多一个 <code>LICENSE</code> 的文件，没有就按照上面说的重新建一下仓库，这个文件必须要有，<code>GZZEditView</code> 目录中的文件就是我要添加 <code>CocoaPods</code> 支持的文件。</p>
+<p><img data-src="https://file.karise.cn/blog/20190509160525.png" alt="目录结构"></p>
+<h2 id="2-创建-podspec-文件"><a href="#2-创建-podspec-文件" class="headerlink" title="2. 创建 podspec 文件"></a>2. 创建 podspec 文件</h2><ul>
+<li>用终端 <code>cd</code> 到你的项目目录并执行以下命令：（ <code>GZZEditView</code> 的位置换成你框架的名称，也是之后 <code>pod search</code> 的名称）</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">pod spec create GZZEditView</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>这时候，项目目录中会生成一个 <code>.podspec</code> 的文件。</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509160539.png" alt=" .podspec 文件"></p>
+<h2 id="3-编辑-podspec-文件"><a href="#3-编辑-podspec-文件" class="headerlink" title="3. 编辑 podspec 文件"></a>3. 编辑 podspec 文件</h2><p>这一步非常重要，能不能验证通过就主要看这个文件的内容编辑是否正确了，作者就在这里耗了很久，总是验证报错。</p>
+<ul>
+<li>用编辑器打开 <code>.podspec</code> 的文件，将内容全部删除，然后将以下内容复制进去，这里只用到一部分必须的字段，如果需要设置更多字段，<a target="_blank" rel="noopener" href="http://guides.cocoapods.org/syntax/podspec.html">点击这里</a>，以下部分字段并不是必须的，根据需求编辑即可。</li>
+</ul>
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="attr">Pod</span>:<span class="string">:Spec.new do |s|</span></span><br><span class="line">    <span class="meta">s.name</span>                       = <span class="string">&#x27;GZZEditView&#x27;</span></span><br><span class="line">    <span class="meta">s.version</span>                    = <span class="string">&#x27;1.0.0&#x27;</span></span><br><span class="line">    <span class="meta">s.summary</span>                    = <span class="string">&#x27;非常简单易用的轻量级编辑框。&#x27;</span></span><br><span class="line">    <span class="meta">s.homepage</span>                   = <span class="string">&#x27;https://github.com/karise-guo/GZZEditView&#x27;</span></span><br><span class="line">    <span class="meta">s.license</span>                    = <span class="string">&#123; :type =&gt; &#x27;MIT&#x27;, :file =&gt; &#x27;LICENSE&#x27; &#125;</span></span><br><span class="line">    <span class="meta">s.author</span>                     = <span class="string">&#123; &#x27;Karise&#x27; =&gt; &#x27;292710547@qq.com&#x27; &#125;</span></span><br><span class="line">    <span class="meta">s.social_media_url</span>           = <span class="string">&#x27;http://weibo.com/karise&#x27;</span></span><br><span class="line">    <span class="meta">s.platform</span>                   = <span class="string">:ios</span></span><br><span class="line">    <span class="meta">s.ios.deployment_target</span>      = <span class="string">&#x27;9.0&#x27;</span></span><br><span class="line">    <span class="meta">s.swift_version</span>            	 = <span class="string">&#x27;4.0&#x27;</span></span><br><span class="line">    <span class="meta">s.source</span>                     = <span class="string">&#123; :git =&gt; &#x27;https://github.com/karise-guo/GZZEditView.git&#x27;, :tag =&gt; s.version &#125;</span></span><br><span class="line">    <span class="meta">s.source_files</span>               = <span class="string">&#x27;GZZEditView/*.&#123;h,m&#125;&#x27;</span></span><br><span class="line">    <span class="meta">s.resource_bundle</span>            = <span class="string">&#123; &#x27;GZZEditView&#x27; =&gt; [&#x27;Resources/**/*.xcassets&#x27;] &#125;</span></span><br><span class="line">    <span class="meta">s.resource</span>                   = <span class="string">&#x27;xxx/xxx.bundle&#x27;</span></span><br><span class="line">    <span class="meta">s.ios.vendored_frameworks</span>    = <span class="string">&#x27;xxx/xxx.framework&#x27;</span></span><br><span class="line">    <span class="meta">s.frameworks</span>                 = <span class="string">&#x27;UIKit&#x27;</span></span><br><span class="line">    <span class="meta">s.static_framework</span>           = <span class="string">true</span></span><br><span class="line">    <span class="meta">s.dependency</span>                 <span class="string">&#x27;Masonry&#x27;</span></span><br><span class="line">    <span class="meta">s.subspec</span> <span class="string">&#x27;GroupName&#x27; do |s|</span></span><br><span class="line">        <span class="attr">...</span></span><br><span class="line">    <span class="attr">end</span></span><br><span class="line"><span class="attr">end</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>开始修改其中的内容，下面讲解一下各字段的含义，<code>xxx</code> 处就是需要修改的内容。</li>
+</ul>
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">s.name</span> = <span class="string">&#x27;xxx&#x27; ：框架名称，也是 pod search 搜索的关键词，并且一定要和 .podspec 文件的名称一样，否则验证报错。（必须）</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">s.version</span> = <span class="string">&#x27;xxx&#x27; ：框架版本号。（必须）</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">s.summary</span> = <span class="string">&#x27;xxx&#x27; ： pod search 搜索框架时，显示的框架简介。（必须）</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">s.homepage</span> = <span class="string">&#x27;xxx&#x27; ：项目主页地址.（必须）</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">s.license</span> = <span class="string">&#123; :type =&gt; &#x27;MIT&#x27;, :file =&gt; &#x27;LICENSE&#x27; &#125; ：许可证，这里就这样写不用修改。（必须）</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">s.author</span> = <span class="string">&#123; &#x27;xxx&#x27; =&gt; &#x27;xxx&#x27; &#125; ：作者，前面填你的英文名，后面填你的个人邮箱。（必须）</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">s.social_media_url</span> = <span class="string">&#x27;xxx&#x27; ：社交网址，我填的是我的个人微博地址。</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">s.platform</span> = <span class="string">:ios ：所属平台，这边不用更改。（必须）</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">s.ios.deployment_target</span> = <span class="string">&#x27;9.0&#x27; ：最低支持的 iOS 版本（必须）</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">s.swift_version</span> = <span class="string">&#x27;4.0&#x27; ：如果是 Swift 的话指定 Swift 编译版本</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">s.source</span> = <span class="string">&#123; :git =&gt; &#x27;xxx&#x27;, :tag =&gt; s.version &#125; ：GitHub 项目的仓库地址，这里只支持 HTTPS ，不支持 SSH 。（必须）</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">s.source_files</span> = <span class="string">&#x27;xxx/*.&#123;h,m&#125;&#x27; ：要添加 CocoaPods 支持的文件路径。</span></span><br><span class="line"></span><br><span class="line"><span class="attr">几种写法：</span></span><br><span class="line"><span class="meta">s.source_files</span> = <span class="string">&#x27;xxx/*&#x27;</span></span><br><span class="line"><span class="meta">s.source_files</span> = <span class="string">&#x27;xxx/*.&#123;h,m&#125;&#x27;</span></span><br><span class="line"><span class="meta">s.source_files</span> = <span class="string">&#x27;xxx/**&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">&#x27;*&#x27;：表示匹配所有文件</span></span><br><span class="line"><span class="meta">&#x27;*.&#123;h,m&#125;&#x27;：表示匹配所有以</span> <span class="string">.h 和 .m 结尾的文件</span></span><br><span class="line"><span class="attr">&#x27;**&#x27;：表示匹配所有子目录</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">s.resource_bundle</span> = <span class="string">&#123; &#x27;xxx&#x27; =&gt; [&#x27;xxx/**/*.xcassets&#x27;] &#125; ：要添加 CocoaPods 支持的图片资源，这个是我后补的所以 Demo 截图中没有这个，可以根据自己需求写。</span></span><br><span class="line"></span><br><span class="line"><span class="meta">如果要在主工程中使用</span> <span class="string">pod 中的图片，方法如下：</span></span><br><span class="line"></span><br><span class="line"><span class="meta">//</span> <span class="string">假如 podspec 中定义的 Bundle 名字为 TestBundle</span></span><br><span class="line"><span class="meta">s.resource_bundle</span> = <span class="string">&#123; &#x27;TestBundle&#x27; =&gt; [&#x27;xxx/**/*.xcassets&#x27;] &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="meta">//</span> <span class="string">这里就用 Swift 写一下，OC 方法是一样的</span></span><br><span class="line"><span class="attr">let</span> <span class="string">url = Bundle(for: View.self).resourceURL!</span></span><br><span class="line"><span class="attr">let</span> <span class="string">bundle = Bundle(url: url.appendingPathComponent(&quot;TestBundle.bundle&quot;))</span></span><br><span class="line"><span class="attr">let</span> <span class="string">image = UIImage(named: &quot;imageName&quot;, in: bundle, compatibleWith: nil)</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">s.resource</span> = <span class="string">&#x27;xxx/xxx.bundle&#x27; ：用于引入自己打包的bundle</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">s.ios.vendored_frameworks</span> = <span class="string">&#x27;xxx/xxx.framework&#x27; ：用于引入自己打包的framework</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">s.frameworks</span> = <span class="string">&#x27;UIKit&#x27;：用于引入官方的 framework</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">s.static_framework</span> = <span class="string">true：用于声明包含静态库</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">s.dependency</span> <span class="string">&#x27;xxx&#x27; ：项目依赖的其他 pod 库，不能依赖未发布的库，版本号可以不写。</span></span><br><span class="line"></span><br><span class="line"><span class="attr">多个依赖可以这样写：</span></span><br><span class="line"><span class="meta">s.dependency</span> <span class="string">&#x27;xxx&#x27;</span></span><br><span class="line"><span class="meta">s.dependency</span> <span class="string">&#x27;xxx&#x27;</span></span><br><span class="line"><span class="meta">s.dependency</span> <span class="string">&#x27;xxx&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">指定版本可以这样写：</span></span><br><span class="line"><span class="meta">s.dependency</span> <span class="string">&#x27;xxx&#x27;, &#x27;1.0.0&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">s.subspec</span> <span class="string">&#x27;xxx&#x27; do |s|</span></span><br><span class="line"></span><br><span class="line"><span class="attr">end</span></span><br><span class="line"></span><br><span class="line"><span class="meta">表示建立一个名字为</span> <span class="string">xxx 的子文件夹，可以将文件分类，我上面用 ... 跳过了，不需要可以不写，里面写法和外面是一样的，例如：</span></span><br><span class="line"></span><br><span class="line"><span class="meta">s.subspec</span> <span class="string">&#x27;xxx&#x27; do |s|</span></span><br><span class="line"></span><br><span class="line">    <span class="meta">s.source_files</span>       = <span class="string">&#x27;xxx/*.&#123;h,m&#125;&#x27;</span></span><br><span class="line">    <span class="meta">s.resource_bundle</span>    = <span class="string">&#123; &#x27;xxx&#x27; =&gt; [&#x27;xxx/**/*.xcassets&#x27;] &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">end</span></span><br><span class="line"></span><br><span class="line"><span class="meta">注意：不同子文件夹下</span> <span class="string">source_files 中的文件是单独编译的，如果文件中引入了别的子文件夹下的代码是编译不通过的。</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="4-验证-podspec-文件"><a href="#4-验证-podspec-文件" class="headerlink" title="4. 验证 podspec 文件"></a>4. 验证 podspec 文件</h2><p><code>podspec</code> 文件修完完成以后，<code>command + s</code> 保存一下，接下来开始验证。</p>
+<ul>
+<li>依旧用终端 <code>cd</code> 到你的项目目录，刚才终端没关的话，就直接执行以下命令：</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">pod lib lint</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>如果是如下图提示只有 <code>warning</code> 错误，并提示 <code>but you can use &#39;--allow-warnings&#39; to ignore them</code> 的话，就执行以下命令忽略 <code>warning</code> 来验证：</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">pod lib lint --allow-warnings</span><br></pre></td></tr></table></figure>
+
+<p><img data-src="https://file.karise.cn/blog/20190509160832.png" alt="验证 podspec 文件失败"></p>
+<ul>
+<li>如果提示有 <code>error</code> 错误的话，就必须按照提示将错误解决掉，大多数都是 <code>podspec</code> 文件信息编辑有误，解决完后重新进行验证，如果提示信息不足，可以执行以下命令以获取更多错误信息：</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">pod lib lint --verbose</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>如果出现如下图的 <code>GZZEditView passed validation.</code> 就是验证成功了。</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509161013.jpg" alt="验证 podspec 文件成功"></p>
+<h2 id="5-给项目打上-tag-版本"><a href="#5-给项目打上-tag-版本" class="headerlink" title="5. 给项目打上 tag 版本"></a>5. 给项目打上 tag 版本</h2><p>因为 <code>CocoaPods</code> 是依赖项目的 <code>tag</code> 版本的，所以必须打上 <code>tag</code> 版本。</p>
+<ul>
+<li><code>podspec</code> 文件验证成功后，先将改动后的文件 <code>commit</code> 提交，接着 <code>push</code> 推送到 <code>GitHub</code> 。</li>
+<li>然后执行以下命令打上 <code>tag</code> 版本，版本名必须要和之前<code>podspec</code> 文件中的 <code>s.version</code> 一致。</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">git tag <span class="string">&quot;1.0.0&quot;</span> // 为 git 提交打上 tag</span><br><span class="line">git push --tags // 将 tag 推送到远程仓库</span><br></pre></td></tr></table></figure>
+
+<h2 id="6-注册-trunk"><a href="#6-注册-trunk" class="headerlink" title="6. 注册 trunk"></a>6. 注册 trunk</h2><p>如果只想发布到私有 <code>CocoaPods</code> 仓库，可以跳过 <code>6、7、8</code> 步直接看第 <code>9</code> 步。</p>
+<p><strong>注意：</strong> <code>trunk</code> 需要 <code>CocoaPods 0.33</code> 版本以上，如果版本太低，就先把 <code>CocoaPods</code> 版本升级一下，具体怎么升级这里就不说了。</p>
+<ul>
+<li>已经注册过 <code>trunk</code> 的就不需要注册了，执行以下命令查看自己有没有注册过：</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">pod trunk me</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>出现以下注册信息就代表已经注册过 <code>trunk</code> 了。</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509161028.png" alt=" trunk 注册信息"></p>
+<ul>
+<li>如果没有就执行以下命令来注册 <code>trunk</code> ，前面填写你的个人邮箱地址，后面填写你的英文名字。</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">pod trunk register xxx <span class="string">&quot;xxx&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>例如：</strong></p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">pod trunk register 292710547@qq.com <span class="string">&quot;Karise&quot;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>执行注册命令完成之后，会验证注册邮箱，给你填的邮箱地址发送一个邮件，进入邮件打开里面的链接，弹出网页后就注册成功了。</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509161043.png" alt="注册邮箱验证"></p>
+<h2 id="7-发布到-CocoaPods"><a href="#7-发布到-CocoaPods" class="headerlink" title="7. 发布到 CocoaPods"></a>7. 发布到 CocoaPods</h2><p>依旧先 <code>cd</code> 到你的项目目录，接着要注意的是，发布时会再次验证你的 <code>podspec</code> 文件，如果刚才验证时使用了 <code>--allow-warnings</code> ，那么发布的时候也应该使用，否则会出现相同的报错，<code>GZZEditView</code> 改成你自己 <code>podspec</code> 文件的名字。</p>
+<ul>
+<li>如果刚才是用 <code>pod lib lint</code> 验证成功的，就执行以下命令发布：</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">pod trunk push GZZEditView.podspec</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>如果刚才是用 <code>pod lib lint --allow-warnings</code> 验证成功的，就执行以下命令发布：</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">pod trunk push GZZEditView.podspec --allow-warnings</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>最后出现如下图所示，就表示发布成功了。</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509161100.png" alt="发布成功"></p>
+<h2 id="8-赶快验证一下吧"><a href="#8-赶快验证一下吧" class="headerlink" title="8. 赶快验证一下吧"></a>8. 赶快验证一下吧</h2><ul>
+<li>执行以下命令搜索你的 <code>pods</code> 库：</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">pod search GZZEditView</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>不出意外的话就会显示出你刚才发布的框架：</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509161115.png" alt="GZZEditView"></p>
+<ul>
+<li>若是 <code>trunk push</code> 成功了，却搜索不到自己的框架，解决方法参考我的另一篇文章 <a target="_blank" rel="noopener" href="http://www.jianshu.com/p/a12da9a64b29">传送门</a> 。</li>
+</ul>
+<h2 id="9-发布到私有仓库"><a href="#9-发布到私有仓库" class="headerlink" title="9. 发布到私有仓库"></a>9. 发布到私有仓库</h2><ul>
+<li><p>发布之前需要先创建一个用来存放私有库的 <code>Git</code> 仓库，然后将仓库 <code>git clone</code> 到 <code>~/.CocoaPods/repo</code> 这个目录。</p>
+</li>
+<li><p>然后在终端输入 <code>pod repo</code> 就可以看到除了有一个 <code>master</code> 的官方库以外，还多了一个自己的私有仓库。</p>
+</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509171841.jpg"></p>
+<ul>
+<li><p>然后依旧先 <code>cd</code> 到你的项目目录，接着要注意的是，发布时会再次验证你的 <code>podspec</code> 文件，如果刚才验证时使用了 <code>--allow-warnings</code> ，那么发布的时候也应该使用，否则会出现相同的报错，<code>fmone</code> 是我自己私有仓库的名字，需要改成你自己的名字，<code>GZZEditView</code> 改成你自己 <code>podspec</code> 文件的名字。</p>
+</li>
+<li><p>如果刚才是用 <code>pod lib lint</code> 验证成功的，就执行以下命令发布：</p>
+</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">pod repo push fmone GZZEditView.podspec</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>如果刚才是用 <code>pod lib lint --allow-warnings</code> 验证成功的，就执行以下命令发布：</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">pod repo push fmone GZZEditView.podspec --allow-warnings</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>最后出现如下图所示，就表示发布成功了。</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509171856.jpg"></p>
+<ul>
+<li>如要项目中要使用私有仓库来 <code>pod install</code> ，必须在 <code>podfile</code> 开头指明私有仓库的地址和官方仓库地址，注意两个地址都要指定，例如：</li>
+</ul>
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="attr">source</span> <span class="string">&#x27;https://github.com/CocoaPods/Specs.git&#x27; # 公共仓库地址</span></span><br><span class="line"><span class="attr">source</span> <span class="string">&#x27;https://github.com/karise-guo/xxx.git&#x27;      # 私有仓库地址</span></span><br><span class="line"></span><br><span class="line"><span class="attr">target</span> <span class="string">&#x27;TestProject&#x27; do</span></span><br><span class="line"></span><br><span class="line"><span class="comment">    # 第三方库</span></span><br><span class="line">    <span class="attr">pod</span> <span class="string">&#x27;Masonry&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">    # 私有库</span></span><br><span class="line">    <span class="attr">pod</span> <span class="string">&#x27;xxx&#x27;</span></span><br><span class="line"><span class="attr">end</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="10-私有库依赖私有库"><a href="#10-私有库依赖私有库" class="headerlink" title="10. 私有库依赖私有库"></a>10. 私有库依赖私有库</h2><p>这个情况就比较特殊了，如果私有库中依赖了另一个私有库，<code>podspec</code> 文件中依旧要使用 <code>s.dependency &#39;xxx&#39;</code> 来指明依赖的私有库，但是在验证 <code>podspec</code> 时就不能使用 <code>pod lib lint</code> 来验证了，否则会找不到依赖的私有库，需要从远程验证并指定私有库的地址，下面是验证步骤。</p>
+<ul>
+<li><p><code>podspec</code> 文件的编辑没有区别，编辑完以后，由于需要远程验证而不是本地验证，所以需要先将编辑完的 <code>podspec</code> 文件 <code>git push</code> 再打上 <code>tag</code> 。</p>
+</li>
+<li><p>然后使用以下命令开始验证，后面指明私有仓库的地址和官方仓库地址，注意两个地址都要指定。</p>
+</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">pod spec lint --sources=<span class="string">&#x27;私有仓库地址,https://github.com/CocoaPods/Specs.git&#x27;</span> --allow-warnings</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>验证成功后发布到私有仓库时，也需要指明私有仓库的地址和官方仓库地址，如下。</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">pod repo push fmone xxx.podspec --sources=<span class="string">&#x27;私有仓库地址,https://github.com/CocoaPods/Specs.git&#x27;</span> --allow-warnings</span><br></pre></td></tr></table></figure>
+
+<p><img data-src="https://file.karise.cn/blog/20190509171912.jpg"></p>
+<hr>
+<blockquote>
+<p>好了，大功告成，其实过程挺简单的，只要 <code>podspec</code> 文件编辑正确，就会少走很多坑，以后再次更新框架的话，只需要修改 <code>podspec</code> 文件中的 <code>s.version</code> 版本，然后把你的项目再打一个 <code>tag</code> 版本，接着再次提交到 <code>CocoaPods</code> 就可以了。</p>
+</blockquote>
+<p><strong>我的传送门：</strong> <a href="https://karise.cn/">博客</a> 、<a target="_blank" rel="noopener" href="https://jianshu.com/u/63659e722f3b">简书</a> 、<a target="_blank" rel="noopener" href="https://weibo.com/karise">微博</a> 、<a target="_blank" rel="noopener" href="https://github.com/karise-guo">GitHub</a> 。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="爱吃鸭梨的猫 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="爱吃鸭梨的猫 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>爱吃鸭梨的猫
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://karise.cn/2017/04/14/iOS/201704141546/" title="【iOS 开发】创建 podspec 文件，给自己写的框架添加 CocoaPos 支持">https://karise.cn/2017/04/14/iOS/201704141546/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/iOS-%E5%BC%80%E5%8F%91/" rel="tag"># iOS 开发</a>
+              <a href="/tags/CocoaPods/" rel="tag"># CocoaPods</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/04/05/Mac/201704051635/" rel="prev" title="macOS Sierra 10.12+ 软件提示已损坏，移除到废纸篓的解决方法">
+      <i class="fa fa-chevron-left"></i> macOS Sierra 10.12+ 软件提示已损坏，移除到废纸篓的解决方法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/04/14/Mac/201704141640/" rel="next" title="解决 macOS 版 iTunes 在 AppStore 无法更新的问题">
+      解决 macOS 版 iTunes 在 AppStore 无法更新的问题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%B0%86%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%8F%90%E4%BA%A4%E5%88%B0-GitHub"><span class="nav-text">1. 将框架源码提交到 GitHub</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%88%9B%E5%BB%BA-podspec-%E6%96%87%E4%BB%B6"><span class="nav-text">2. 创建 podspec 文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E7%BC%96%E8%BE%91-podspec-%E6%96%87%E4%BB%B6"><span class="nav-text">3. 编辑 podspec 文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E9%AA%8C%E8%AF%81-podspec-%E6%96%87%E4%BB%B6"><span class="nav-text">4. 验证 podspec 文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E7%BB%99%E9%A1%B9%E7%9B%AE%E6%89%93%E4%B8%8A-tag-%E7%89%88%E6%9C%AC"><span class="nav-text">5. 给项目打上 tag 版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E6%B3%A8%E5%86%8C-trunk"><span class="nav-text">6. 注册 trunk</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-%E5%8F%91%E5%B8%83%E5%88%B0-CocoaPods"><span class="nav-text">7. 发布到 CocoaPods</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-%E8%B5%B6%E5%BF%AB%E9%AA%8C%E8%AF%81%E4%B8%80%E4%B8%8B%E5%90%A7"><span class="nav-text">8. 赶快验证一下吧</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-%E5%8F%91%E5%B8%83%E5%88%B0%E7%A7%81%E6%9C%89%E4%BB%93%E5%BA%93"><span class="nav-text">9. 发布到私有仓库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-%E7%A7%81%E6%9C%89%E5%BA%93%E4%BE%9D%E8%B5%96%E7%A7%81%E6%9C%89%E5%BA%93"><span class="nav-text">10. 私有库依赖私有库</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="爱吃鸭梨的猫"
+      src="/images/cat.jpg">
+  <p class="site-author-name" itemprop="name">爱吃鸭梨的猫</p>
+  <div class="site-description" itemprop="description">创造财富 才是时间最正确的归宿</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">76</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">119</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/karise" title="微博 → http:&#x2F;&#x2F;weibo.com&#x2F;karise" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>微博</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:292710547@qq.com" title="邮箱 → mailto:292710547@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>邮箱</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.jianshu.com/u/63659e722f3b" title="简书 → http:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;63659e722f3b" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/karise-guo" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;karise-guo" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heartbeat"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱吃鸭梨的猫</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+  <div style="display: none;">
+    <script data-pjax src="//s95.cnzz.com/z_stat.php?id=1262401548&web_id=1262401548"></script>
+  </div>
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/npm/algoliasearch@4/dist/algoliasearch-lite.umd.js"></script>
+<script src="//cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
+<script src="/js/algolia-search.js"></script>
+
+
+
+
+
+
+
+  <script src="//code.tidio.co/koavrszo8ljadwqznhu3xloogrgfg7gt.js"></script>
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '96fe4c8974d2415f9fc0',
+      clientSecret: 'ece2551d6a09bfe9f9421ac6e85f1472daf6122c',
+      repo        : 'BlogComment',
+      owner       : 'karise-guo',
+      admin       : ['karise-guo'],
+      id          : '677b7e1a2f2a6d214da25f87583aa8ed',
+        language: 'zh-CN',
+      distractionFreeMode: false
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+    </div>
+</body>
+</html>

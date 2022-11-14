@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/cat.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/cat.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/cat.jpg">
+  <link rel="mask-icon" href="/images/cat.jpg" color="#222">
+  <meta name="google-site-verification" content="6FbWia2UHu0Rj0-k91-sJlCX_0u5twNvlB9Nha097oc">
+  <meta name="baidu-site-verification" content="fecPuO9wLA">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"karise.cn","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"appID":"6R1TPR58SX","apiKey":"b7b85229dc744164111c058bfea5448c","indexName":"Karise","hits":{"per_page":10},"labels":{"input_placeholder":"请输入搜索内容...","hits_empty":"没有搜索到关于 “${query}” 的任何内容。","hits_stats":"一共搜索到 ${hits} 个结果，使用了 ${time} 毫秒。"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="持续集成（Continuous Integration 简称 CI）。Jenkins 是一个开源项目，提供了一种易于使用的持续集成系统，使开发者从繁杂的集成中解脱出来，专注于更为重要的业务逻辑实现上。具体就不多说了，想要更多的了解可以去查一下，下面是集成方法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【iOS 开发】使用 Jenkins + Fastlane 持续集成 iOS 项目">
+<meta property="og:url" content="https://karise.cn/2017/11/13/iOS/201711131450/index.html">
+<meta property="og:site_name" content="爱吃鸭梨的猫">
+<meta property="og:description" content="持续集成（Continuous Integration 简称 CI）。Jenkins 是一个开源项目，提供了一种易于使用的持续集成系统，使开发者从繁杂的集成中解脱出来，专注于更为重要的业务逻辑实现上。具体就不多说了，想要更多的了解可以去查一下，下面是集成方法。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://file.karise.cn/blog/57366983-b8375300-71ba-11e9-8463-3428444f2544.png">
+<meta property="article:published_time" content="2017-11-13T06:50:53.000Z">
+<meta property="article:modified_time" content="2022-11-11T09:44:54.938Z">
+<meta property="article:author" content="爱吃鸭梨的猫">
+<meta property="article:tag" content="iOS 开发">
+<meta property="article:tag" content="Fastlane">
+<meta property="article:tag" content="持续集成">
+<meta property="article:tag" content="Jenkins">
+<meta property="article:tag" content="自动化打包">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://file.karise.cn/blog/57366983-b8375300-71ba-11e9-8463-3428444f2544.png">
+
+<link rel="canonical" href="https://karise.cn/2017/11/13/iOS/201711131450/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【iOS 开发】使用 Jenkins + Fastlane 持续集成 iOS 项目 | 爱吃鸭梨的猫</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-101397377-1"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-101397377-1');
+      }
+    </script>
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?23e551cb7374b653d003004a84ced259";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="爱吃鸭梨的猫" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta custom-logo">
+      <div class="site-meta-headline">
+        <a>
+          <img class="custom-logo-image" src="/images/cat.jpg" alt="爱吃鸭梨的猫">
+        </a>
+      </div>
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">爱吃鸭梨的猫</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">创造财富 才是时间最正确的归宿</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>博客首页</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/catalog/" rel="section"><i class="fa fa-fw fa-list-ul"></i>博文目录</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-folder-open"></i>文章分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-cloud"></i>标签云集</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-hourglass-half"></i>我的历程</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/message/" rel="section"><i class="fa fa-fw fa-commenting"></i>给我留言</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于博主</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索文章
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="algolia-results">
+  <div id="algolia-stats"></div>
+  <div id="algolia-hits"></div>
+  <div id="algolia-pagination" class="algolia-pagination"></div>
+</div>
+
+      
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://karise.cn/2017/11/13/iOS/201711131450/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/cat.jpg">
+      <meta itemprop="name" content="爱吃鸭梨的猫">
+      <meta itemprop="description" content="创造财富 才是时间最正确的归宿">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="爱吃鸭梨的猫">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【iOS 开发】使用 Jenkins + Fastlane 持续集成 iOS 项目
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-11-13 14:50:53" itemprop="dateCreated datePublished" datetime="2017-11-13T14:50:53+08:00">2017-11-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-11-11 17:44:54" itemprop="dateModified" datetime="2022-11-11T17:44:54+08:00">2022-11-11</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS-%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">iOS 开发</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+            <img src="https://file.karise.cn/blog/57366983-b8375300-71ba-11e9-8463-3428444f2544.png" itemprop="contentUrl">
+        </div>
+        <blockquote>
+<p>持续集成（<a target="_blank" rel="noopener" href="http://martinfowler.com/articles/continuousIntegration.html">Continuous Integration</a> 简称 <code>CI</code>）。<a target="_blank" rel="noopener" href="https://jenkins.io/">Jenkins</a> 是一个开源项目，提供了一种易于使用的持续集成系统，使开发者从繁杂的集成中解脱出来，专注于更为重要的业务逻辑实现上。具体就不多说了，想要更多的了解可以去查一下，下面是集成方法。</p>
+</blockquote>
+<a id="more"></a>
+
+<hr>
+<p><strong>本文最终目的：</strong></p>
+<ul>
+<li>测试人员可登录 <code>Jenkins</code> 网页自行选择 <code>开发分支</code> 和 <code>打包类型</code> ，然后自动打包完成并自动上传至 <code>蒲公英</code> 或 <code>iTunes Connect</code> ，不再需要开发人员手动安装或上传。</li>
+</ul>
+<h2 id="1-配置-Fastlane"><a href="#1-配置-Fastlane" class="headerlink" title="1. 配置 Fastlane"></a>1. 配置 Fastlane</h2><p>由于项目的编译打包以及上传全部要依赖 <code>Fastlane</code> 来进行，所以在配置 <code>Jenkins</code> 之前要保证项目已经配置好了 <code>Fastlane</code> ，这里看我的另一篇文章：<a target="_blank" rel="noopener" href="http://www.jianshu.com/p/662677cb1b47">【iOS 开发】使用 Fastlane 自动化打包并发布 iOS 项目</a> 。</p>
+<h2 id="2-安装-Jenkins"><a href="#2-安装-Jenkins" class="headerlink" title="2. 安装 Jenkins"></a>2. 安装 Jenkins</h2><ul>
+<li><p><code>Jenkins</code> 依赖于 <code>Java</code> 运行环境，因此需要先保证电脑已经安装了 <code>Java JDK</code> ，如果没有的话前往 <a target="_blank" rel="noopener" href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html">这里</a> 下载安装即可。</p>
+</li>
+<li><p>我这里是使用 <a target="_blank" rel="noopener" href="https://brew.sh/">homebrew</a> 安装 <code>Jenkins</code> ，没有安装 <code>homebrew </code> 的输入以下命令安装一下。</p>
+</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">/usr/bin/ruby -e <span class="string">&quot;<span class="subst">$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)</span>&quot;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>千万不要去 <code>Jenkins</code> 官网下载 <code>pkg</code> 安装包安装，因为用安装包安装会自动生成一个共享用户 <code>jenkins</code>，而这个用户的权限和系统登录用户的权限不同，会造成大量的权限问题，我已经被坑惨了，用 <code>homebrew </code> 装是不会生成共享用户的。</p>
+</li>
+<li><p><code>homebrew</code> 安装完成后输入以下命令安装 <code>Jenkins</code> 。</p>
+</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">brew install jenkins</span><br></pre></td></tr></table></figure>
+
+<p><img data-src="https://file.karise.cn/blog/20190509165227.png" alt="安装"></p>
+<ul>
+<li>如果想要卸载直接执行以下命令即可卸载 <code>Jenkins</code> 。</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">brew uninstall jenkins</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>安装完成后输入以下命令链接 <code>launchd</code> 配置文件。</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">ln -sfv /usr/<span class="built_in">local</span>/opt/jenkins/*.plist ~/Library/LaunchAgents</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>然后执行以下命令启动 <code>Jenkins</code> 。</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">launchctl load ~/Library/LaunchAgents/homebrew.mxcl.jenkins.plist</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>Jenkins</code> 默认是开机自动启动的，如果想关闭就执行以下命令即可关闭。</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.jenkins.plist</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>接着打开浏览器，输入 <a target="_blank" rel="noopener" href="http://localhost:8080/">http://localhost:8080</a> ，就可以看到 <code>Jenkins</code> 已经启动。</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509165242.png" alt="Jenkins"></p>
+<ul>
+<li><code>Jenkins</code> 默认端口号是 <code>8080</code> ，如果想要更改端口号的话可以用 <code>Xcode</code> 打开以下文件，将 <code>httpPort</code> 后面的 <code>8080</code> 改成你想要的端口号即可。</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">/usr/<span class="built_in">local</span>/opt/jenkins/homebrew.mxcl.jenkins.plist</span><br></pre></td></tr></table></figure>
+
+<p><img data-src="https://file.karise.cn/blog/20190509165253.png" alt="修改端口"></p>
+<h2 id="3-配置-Jenkins"><a href="#3-配置-Jenkins" class="headerlink" title="3. 配置 Jenkins"></a>3. 配置 Jenkins</h2><ul>
+<li>等待启动完成后 ，会出现以下界面让你输入密码解锁。</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509165307.png" alt="Jenkins"></p>
+<ul>
+<li>密码就在上面提示的 <code>/Users/Jonzzs/.jenkins/secrets/initialAdminPassword</code> 文件中，打开 <code>initialAdminPassword</code> 文件将密码复制到浏览器解锁即可，然后点击第一个 <code>Install suggested plugins</code>。</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509165322.png" alt="Jenkins"></p>
+<ul>
+<li>然后等待插件全部安装完成。</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509165344.png" alt="Jenkins"></p>
+<ul>
+<li>安装完成后会跳出创建用户界面，按照提示创建用户即可。</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509165359.png" alt="Jenkins"></p>
+<ul>
+<li>最后到这个页面就算是安装完成了。</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509165414.png" alt="Jenkins"></p>
+<h2 id="4-安装插件"><a href="#4-安装插件" class="headerlink" title="4. 安装插件"></a>4. 安装插件</h2><ul>
+<li>在建任务之前需要先安装几个插件，前往 <code>系统管理</code> - <code>管理插件</code> ，在 <code>可选插件</code> 中搜索 <code>GitLab Plugin</code> 、<code>Gitlab Hook Plugin</code> 、<code>Xcode integration</code> 这三个插件，然后安装。</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509165429.png" alt="Jenkins"></p>
+<h2 id="5-配置环境变量"><a href="#5-配置环境变量" class="headerlink" title="5. 配置环境变量"></a>5. 配置环境变量</h2><ul>
+<li>前往 <code>系统管理</code> - <code>系统设置</code> 找到 <code>全局属性</code> ，然后添加以下三个环境变量。</li>
+</ul>
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="attr">LANG</span></span><br><span class="line"><span class="attr">en_US.UTF-8</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="attr">LANGUAGE</span></span><br><span class="line"><span class="attr">en_US.UTF-8</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="attr">LC_ALL</span></span><br><span class="line"><span class="attr">en_US.UTF-8</span></span><br></pre></td></tr></table></figure>
+
+<p><img data-src="https://file.karise.cn/blog/20190509165443.png" alt="环境变量"></p>
+<ul>
+<li>这三个环境变量是用来修改编码格式的，如果不加下面脚本执行 <code>fastlane</code> 命令时会报错。</li>
+</ul>
+<h2 id="6-创建任务"><a href="#6-创建任务" class="headerlink" title="6. 创建任务"></a>6. 创建任务</h2><ul>
+<li>插件安装完成以后就可以开始创建项目了，点击新建任务，输入你的项目名称。</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509165455.png" alt="Jenkins"></p>
+<ul>
+<li>勾选 <code>参数化构建过程</code> ，添加一个 <code>String Parameter</code> 和一个 <code>Choice Parameter</code> ，第一个 <code>ARCHIVE_BRANCH</code> 主要是输入要打包的项目分支，第二个 <code>ARCHIVE_TYPE</code> 是选择打包的类型，我这边 <code>beta</code> 是打包发布到 <code>蒲公英</code> ，<code>release</code> 是打包发布到 <code>iTunes Connect</code> ，如果你不需要这些参数可以跳过。</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509165507.png" alt="Jenkins"></p>
+<ul>
+<li>在 <code>源码管理</code> 输入你的仓库地址，地址为 <code>SSH</code> 方式，然后需要在点击 <code>Add</code> 添加 <code>SSH Key</code> 。</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509165518.png" alt="Jenkins"></p>
+<ul>
+<li><p>选择 <code>SSH Username with private key</code> 类型，<code>Username</code> 随便填，然后选择 <code>Enter directly</code> ，将自己 <code>SSH Key</code> 的私钥复制进去即可，注意是私钥不是公钥，<code>/Users/Jonzzs/.ssh/id_rsa</code> 在这个文件里。</p>
+</li>
+<li><p>如果自己电脑没有生成过 <code>SSH Key</code> ，就自己去查一下吧，这里就不重复了。</p>
+</li>
+<li><p>最后在 <code>构建</code> 中增加一个 <code>Execute Shell</code> ，主要用来填写脚本内容。</p>
+</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509165542.png" alt="Jenkins"></p>
+<ul>
+<li>填写以下脚本命令，<code>xxx</code> 处填写自己项目相应文件夹名，因为在执行 <code>fastlane</code> 指令之前需要进入 <code>fastlane</code> 文件夹所在目录，如果你的 <code>git</code> 根目录就是在项目目录的话，可以不用这句，然后点击 <code>保存</code> 即可。</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">git checkout <span class="variable">$&#123;ARCHIVE_BRANCH&#125;</span></span><br><span class="line">git pull</span><br><span class="line"><span class="built_in">cd</span> ./xxx</span><br><span class="line">fastlane <span class="variable">$&#123;ARCHIVE_TYPE&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="7-开始打包"><a href="#7-开始打包" class="headerlink" title="7. 开始打包"></a>7. 开始打包</h2><ul>
+<li>进入你创建的任务，点击 <code>Build with Parameters</code> ，然后输入要打包的项目分支以及类型，然后点击 <code>开始构建</code> 即可开始打包。</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509165554.png" alt="Jenkins"></p>
+<ul>
+<li>如果构建失败，也可以在 <code>Build History</code> 中点击 <code>Console Output</code> 查看控制台输出记录，找到错误原因。</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509165605.png" alt="Jenkins"></p>
+<hr>
+<blockquote>
+<p>配置方法到这里就完成了，有不明白的地方可以留言。</p>
+</blockquote>
+<p><strong>我的传送门：</strong> <a href="https://karise.cn/">博客</a> 、<a target="_blank" rel="noopener" href="https://jianshu.com/u/63659e722f3b">简书</a> 、<a target="_blank" rel="noopener" href="https://weibo.com/karise">微博</a> 、<a target="_blank" rel="noopener" href="https://github.com/karise-guo">GitHub</a> 。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="爱吃鸭梨的猫 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="爱吃鸭梨的猫 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>爱吃鸭梨的猫
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://karise.cn/2017/11/13/iOS/201711131450/" title="【iOS 开发】使用 Jenkins + Fastlane 持续集成 iOS 项目">https://karise.cn/2017/11/13/iOS/201711131450/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/iOS-%E5%BC%80%E5%8F%91/" rel="tag"># iOS 开发</a>
+              <a href="/tags/Fastlane/" rel="tag"># Fastlane</a>
+              <a href="/tags/%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90/" rel="tag"># 持续集成</a>
+              <a href="/tags/Jenkins/" rel="tag"># Jenkins</a>
+              <a href="/tags/%E8%87%AA%E5%8A%A8%E5%8C%96%E6%89%93%E5%8C%85/" rel="tag"># 自动化打包</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/11/09/iOS/201711091509/" rel="prev" title="【iOS 开发】使用 Fastlane 自动化打包并发布 iOS 项目">
+      <i class="fa fa-chevron-left"></i> 【iOS 开发】使用 Fastlane 自动化打包并发布 iOS 项目
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/11/21/Mac/201711211402/" rel="next" title="mac 删除 Windows 或 EFI Boot 启动盘的方法">
+      mac 删除 Windows 或 EFI Boot 启动盘的方法 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E9%85%8D%E7%BD%AE-Fastlane"><span class="nav-text">1. 配置 Fastlane</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%AE%89%E8%A3%85-Jenkins"><span class="nav-text">2. 安装 Jenkins</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E9%85%8D%E7%BD%AE-Jenkins"><span class="nav-text">3. 配置 Jenkins</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%AE%89%E8%A3%85%E6%8F%92%E4%BB%B6"><span class="nav-text">4. 安装插件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E9%85%8D%E7%BD%AE%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="nav-text">5. 配置环境变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E5%88%9B%E5%BB%BA%E4%BB%BB%E5%8A%A1"><span class="nav-text">6. 创建任务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-%E5%BC%80%E5%A7%8B%E6%89%93%E5%8C%85"><span class="nav-text">7. 开始打包</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="爱吃鸭梨的猫"
+      src="/images/cat.jpg">
+  <p class="site-author-name" itemprop="name">爱吃鸭梨的猫</p>
+  <div class="site-description" itemprop="description">创造财富 才是时间最正确的归宿</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">76</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">119</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/karise" title="微博 → http:&#x2F;&#x2F;weibo.com&#x2F;karise" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>微博</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:292710547@qq.com" title="邮箱 → mailto:292710547@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>邮箱</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.jianshu.com/u/63659e722f3b" title="简书 → http:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;63659e722f3b" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/karise-guo" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;karise-guo" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heartbeat"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱吃鸭梨的猫</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+  <div style="display: none;">
+    <script data-pjax src="//s95.cnzz.com/z_stat.php?id=1262401548&web_id=1262401548"></script>
+  </div>
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/npm/algoliasearch@4/dist/algoliasearch-lite.umd.js"></script>
+<script src="//cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
+<script src="/js/algolia-search.js"></script>
+
+
+
+
+
+
+
+  <script src="//code.tidio.co/koavrszo8ljadwqznhu3xloogrgfg7gt.js"></script>
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '96fe4c8974d2415f9fc0',
+      clientSecret: 'ece2551d6a09bfe9f9421ac6e85f1472daf6122c',
+      repo        : 'BlogComment',
+      owner       : 'karise-guo',
+      admin       : ['karise-guo'],
+      id          : 'cb6da13b9bc5e845cf233e3525a1ea7f',
+        language: 'zh-CN',
+      distractionFreeMode: false
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+    </div>
+</body>
+</html>

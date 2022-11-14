@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/cat.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/cat.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/cat.jpg">
+  <link rel="mask-icon" href="/images/cat.jpg" color="#222">
+  <meta name="google-site-verification" content="6FbWia2UHu0Rj0-k91-sJlCX_0u5twNvlB9Nha097oc">
+  <meta name="baidu-site-verification" content="fecPuO9wLA">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"karise.cn","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"appID":"6R1TPR58SX","apiKey":"b7b85229dc744164111c058bfea5448c","indexName":"Karise","hits":{"per_page":10},"labels":{"input_placeholder":"请输入搜索内容...","hits_empty":"没有搜索到关于 “${query}” 的任何内容。","hits_stats":"一共搜索到 ${hits} 个结果，使用了 ${time} 毫秒。"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="在日常的 iOS 开发中，关于多线程使用的较多的就是 Grand Central Dispatch（GCD） 了，GCD 会自动利用更多的 CPU 内核，会自动管理线程的生命周期，总之 GCD 的好处还是非常之多的，下面就对 GCD 的使用进行一个汇总。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【iOS 开发】多线程 GCD 的使用汇总">
+<meta property="og:url" content="https://karise.cn/2017/06/09/iOS/201706091323/index.html">
+<meta property="og:site_name" content="爱吃鸭梨的猫">
+<meta property="og:description" content="在日常的 iOS 开发中，关于多线程使用的较多的就是 Grand Central Dispatch（GCD） 了，GCD 会自动利用更多的 CPU 内核，会自动管理线程的生命周期，总之 GCD 的好处还是非常之多的，下面就对 GCD 的使用进行一个汇总。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://file.karise.cn/blog/57366728-33e4d000-71ba-11e9-9fb4-bad4d228f85a.png">
+<meta property="article:published_time" content="2017-06-09T05:23:00.000Z">
+<meta property="article:modified_time" content="2022-11-11T09:44:54.936Z">
+<meta property="article:author" content="爱吃鸭梨的猫">
+<meta property="article:tag" content="iOS 开发">
+<meta property="article:tag" content="GCD">
+<meta property="article:tag" content="多线程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://file.karise.cn/blog/57366728-33e4d000-71ba-11e9-9fb4-bad4d228f85a.png">
+
+<link rel="canonical" href="https://karise.cn/2017/06/09/iOS/201706091323/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【iOS 开发】多线程 GCD 的使用汇总 | 爱吃鸭梨的猫</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-101397377-1"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-101397377-1');
+      }
+    </script>
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?23e551cb7374b653d003004a84ced259";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="爱吃鸭梨的猫" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta custom-logo">
+      <div class="site-meta-headline">
+        <a>
+          <img class="custom-logo-image" src="/images/cat.jpg" alt="爱吃鸭梨的猫">
+        </a>
+      </div>
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">爱吃鸭梨的猫</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">创造财富 才是时间最正确的归宿</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>博客首页</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/catalog/" rel="section"><i class="fa fa-fw fa-list-ul"></i>博文目录</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-folder-open"></i>文章分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-cloud"></i>标签云集</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-hourglass-half"></i>我的历程</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/message/" rel="section"><i class="fa fa-fw fa-commenting"></i>给我留言</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于博主</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索文章
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="algolia-results">
+  <div id="algolia-stats"></div>
+  <div id="algolia-hits"></div>
+  <div id="algolia-pagination" class="algolia-pagination"></div>
+</div>
+
+      
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://karise.cn/2017/06/09/iOS/201706091323/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/cat.jpg">
+      <meta itemprop="name" content="爱吃鸭梨的猫">
+      <meta itemprop="description" content="创造财富 才是时间最正确的归宿">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="爱吃鸭梨的猫">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【iOS 开发】多线程 GCD 的使用汇总
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-06-09 13:23:00" itemprop="dateCreated datePublished" datetime="2017-06-09T13:23:00+08:00">2017-06-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-11-11 17:44:54" itemprop="dateModified" datetime="2022-11-11T17:44:54+08:00">2022-11-11</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS-%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">iOS 开发</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+            <img src="https://file.karise.cn/blog/57366728-33e4d000-71ba-11e9-9fb4-bad4d228f85a.png" itemprop="contentUrl">
+        </div>
+        <blockquote>
+<p>在日常的 <code>iOS</code> 开发中，关于多线程使用的较多的就是 <code>Grand Central Dispatch（GCD）</code> 了，<code>GCD</code> 会自动利用更多的 <code>CPU</code> 内核，会自动管理线程的生命周期，总之 <code>GCD</code> 的好处还是非常之多的，下面就对 <code>GCD</code> 的使用进行一个汇总。</p>
+</blockquote>
+<a id="more"></a>
+
+<hr>
+<h2 id="GCD-的创建"><a href="#GCD-的创建" class="headerlink" title="GCD 的创建"></a>GCD 的创建</h2><p><code>GCD</code> 中两个核心概念：<code>队列</code> 和 <code>任务</code> ，一般基本的用法只需要创建这两步即可。</p>
+<h3 id="1-队列的创建"><a href="#1-队列的创建" class="headerlink" title="1. 队列的创建"></a>1. 队列的创建</h3><p>队列有两种方式：<code>串行队列</code> 和 <code>并发队列</code> 。</p>
+<ul>
+<li><code>串行队列（Serial Dispatch Queue）</code> ：让任务一个接着一个地执行，一个任务执行完毕后，再执行下一个任务。</li>
+</ul>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="built_in">dispatch_queue_t</span> queue = dispatch_queue_create(<span class="literal">NULL</span>, DISPATCH_QUEUE_SERIAL);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>并发队列（Concurrent Dispatch Queue）</code> ：可以让多个任务同时一起执行，但是并发队列只有在 <code>异步（dispatch_async）</code> 函数下才有效。</li>
+</ul>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="built_in">dispatch_queue_t</span> queue = dispatch_queue_create(<span class="literal">NULL</span>, DISPATCH_QUEUE_CONCURRENT);</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-任务的创建"><a href="#2-任务的创建" class="headerlink" title="2. 任务的创建"></a>2. 任务的创建</h3><p>执行任务也有两种方式：<code>同步执行</code> 和 <code>异步执行</code> 。</p>
+<ul>
+<li><code>同步执行（sync）</code> ：等待线程任务完成之后，才会进行接下来的操作。</li>
+</ul>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="built_in">dispatch_sync</span>(queue, ^ &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;同步执行的任务&quot;</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>异步执行（async）</code> ：线程任务单独执行，不会影响接下来的操作。</li>
+</ul>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="built_in">dispatch_async</span>(queue, ^ &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;异步执行的任务&quot;</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="GCD-的使用"><a href="#GCD-的使用" class="headerlink" title="GCD 的使用"></a>GCD 的使用</h2><p>在 <code>iOS</code> 开发过程中，我们一般在 <code>主线程</code> 里边进行 <code>UI</code> 刷新，例如：<code>点击、滚动、拖拽</code> 等事件，而耗时的操作则会放在 <code>子线程</code> 里边进行。而当我们有时候在 <code>子线程</code> 完成了耗时操作时，需要回到主线程，那么就用到了下面这个方法。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_main_queue(), ^ &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;回到主线程&quot;</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-串行队列-同步执行"><a href="#1-串行队列-同步执行" class="headerlink" title="1. 串行队列 + 同步执行"></a>1. 串行队列 + 同步执行</h3><figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;----------- 开始 -----------&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">dispatch_queue_t</span> queue = dispatch_queue_create(<span class="literal">NULL</span>, DISPATCH_QUEUE_SERIAL);</span><br><span class="line"><span class="built_in">dispatch_sync</span>(queue, ^ &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">3</span>; i++) &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;任务 1&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">dispatch_async</span>(dispatch_get_main_queue(), ^ &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;任务 1 回到主线程&quot;</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"><span class="built_in">dispatch_sync</span>(queue, ^ &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">3</span>; i++) &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;任务 2&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">dispatch_async</span>(dispatch_get_main_queue(), ^ &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;任务 2 回到主线程&quot;</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;----------- 结束 -----------&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>因为 <code>串行队列</code> 是按顺序执行任务，而 <code>同步任务</code> 又是等待线程任务完成之后，才会进行接下来的操作，所以基本和不使用多线程的效果是相同的，下面是打印结果：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">----------- 开始 -----------</span><br><span class="line">任务 <span class="number">1</span></span><br><span class="line">任务 <span class="number">1</span></span><br><span class="line">任务 <span class="number">1</span></span><br><span class="line">任务 <span class="number">2</span></span><br><span class="line">任务 <span class="number">2</span></span><br><span class="line">任务 <span class="number">2</span></span><br><span class="line">----------- 结束 -----------</span><br><span class="line">任务 <span class="number">1</span> 回到主线程</span><br><span class="line">任务 <span class="number">2</span> 回到主线程</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-串行队列-异步执行"><a href="#2-串行队列-异步执行" class="headerlink" title="2. 串行队列 + 异步执行"></a>2. 串行队列 + 异步执行</h3><figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;----------- 开始 -----------&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">dispatch_queue_t</span> queue = dispatch_queue_create(<span class="literal">NULL</span>, DISPATCH_QUEUE_SERIAL);</span><br><span class="line"><span class="built_in">dispatch_async</span>(queue, ^ &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">3</span>; i++) &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;任务 1&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">dispatch_async</span>(dispatch_get_main_queue(), ^ &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;任务 1 回到主线程&quot;</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"><span class="built_in">dispatch_async</span>(queue, ^ &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">3</span>; i++) &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;任务 2&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">dispatch_async</span>(dispatch_get_main_queue(), ^ &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;任务 2 回到主线程&quot;</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;----------- 结束 -----------&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>由于 <code>异步任务</code> 是单独执行，所以不会影响到正常代码的执行，所以明显就和上面有区别了，下面是打印结果：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">----------- 开始 -----------</span><br><span class="line">----------- 结束 -----------</span><br><span class="line">任务 <span class="number">1</span></span><br><span class="line">任务 <span class="number">1</span></span><br><span class="line">任务 <span class="number">1</span></span><br><span class="line">任务 <span class="number">2</span></span><br><span class="line">任务 <span class="number">2</span></span><br><span class="line">任务 <span class="number">2</span></span><br><span class="line">任务 <span class="number">1</span> 回到主线程</span><br><span class="line">任务 <span class="number">2</span> 回到主线程</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-并发队列-异步执行"><a href="#3-并发队列-异步执行" class="headerlink" title="3. 并发队列 + 异步执行"></a>3. 并发队列 + 异步执行</h3><p>由于 <code>并发队列</code> 在 <code>同步任务</code> 中是无效的，<code>并发队列 + 同步执行</code> 和 <code>串行队列 + 同步执行</code> 没有任何区别，所以跳过直接看 <code>并发队列 + 异步执行</code> 。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;----------- 开始 -----------&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">dispatch_queue_t</span> queue = dispatch_queue_create(<span class="literal">NULL</span>, DISPATCH_QUEUE_CONCURRENT);</span><br><span class="line"><span class="built_in">dispatch_async</span>(queue, ^ &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">3</span>; i++) &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;任务 1&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">dispatch_async</span>(dispatch_get_main_queue(), ^ &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;任务 1 回到主线程&quot;</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"><span class="built_in">dispatch_async</span>(queue, ^ &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">3</span>; i++) &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;任务 2&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">dispatch_async</span>(dispatch_get_main_queue(), ^ &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;任务 2 回到主线程&quot;</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;----------- 结束 -----------&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>由于 <code>并发队列</code> 是多个任务同时执行的，所以可以看到 <code>任务1</code> 和 <code>任务2</code> 基本是同时执行的，下面是打印结果：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">----------- 开始 -----------</span><br><span class="line">----------- 结束 -----------</span><br><span class="line">任务 <span class="number">1</span></span><br><span class="line">任务 <span class="number">2</span></span><br><span class="line">任务 <span class="number">1</span></span><br><span class="line">任务 <span class="number">2</span></span><br><span class="line">任务 <span class="number">1</span></span><br><span class="line">任务 <span class="number">2</span></span><br><span class="line">任务 <span class="number">1</span> 回到主线程</span><br><span class="line">任务 <span class="number">2</span> 回到主线程</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-notification-队列组（异步-并发）"><a href="#4-notification-队列组（异步-并发）" class="headerlink" title="4. notification 队列组（异步 + 并发）"></a>4. notification 队列组（异步 + 并发）</h3><p>上面 <code>并发队列 + 异步执行</code> 是各自任务完成后各自回到 <code>主线程</code> 。但是有时候我们会有这样的需求：分别异步执行两个耗时操作，然后当两个耗时操作都执行完毕后再回到 <code>主线程</code> 执行操作，这时候我们可以用到 <code>GCD</code> 的 <code>notification</code> 队列组。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;----------- 开始 -----------&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">dispatch_queue_t</span> queue = dispatch_get_global_queue(<span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">dispatch_group_t group = dispatch_group_create();</span><br><span class="line">dispatch_group_async(group, queue, ^ &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">3</span>; i++) &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;任务 1&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line">dispatch_group_async(group, queue, ^ &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">3</span>; i++) &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;任务 2&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 在组内的任务都运行完了之后再回到主线程 */</span></span><br><span class="line">dispatch_group_notify(group, dispatch_get_main_queue(), ^ &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;回到主线程&quot;</span>);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;----------- 结束 -----------&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p><code>notification</code> 队列组会等到两个任务都执行完才会回到主线程，下面是打印结果：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">----------- 开始 -----------</span><br><span class="line">----------- 结束 -----------</span><br><span class="line">任务 <span class="number">1</span></span><br><span class="line">任务 <span class="number">2</span></span><br><span class="line">任务 <span class="number">1</span></span><br><span class="line">任务 <span class="number">2</span></span><br><span class="line">任务 <span class="number">1</span></span><br><span class="line">任务 <span class="number">2</span></span><br><span class="line">回到主线程</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-wait-队列组（同步-并发）"><a href="#5-wait-队列组（同步-并发）" class="headerlink" title="5. wait 队列组（同步 + 并发）"></a>5. wait 队列组（同步 + 并发）</h3><p>上面说过 <code>并发队列</code> 在 <code>同步任务</code> 中时无效的，但是 <code>wait</code> 队列组就能实现这个 <code>同步 + 并发</code> 效果。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;----------- 开始 -----------&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">dispatch_queue_t</span> queue = dispatch_get_global_queue(<span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">dispatch_group_t group = dispatch_group_create();</span><br><span class="line">dispatch_group_async(group, queue, ^ &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">3</span>; i++) &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;任务 1&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line">dispatch_group_async(group, queue, ^ &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">3</span>; i++) &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;任务 2&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 等待组内的任务都完成后，继续运行 */</span></span><br><span class="line">dispatch_group_wait(group, DISPATCH_TIME_FOREVER);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 回到主线程 */</span></span><br><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_main_queue(), ^ &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;回到主线程&quot;</span>);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;----------- 结束 -----------&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>可以看到任务是并发执行的，并且 <code>结束</code> 的打印在任务完成之后，下面是打印结果：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">----------- 开始 -----------</span><br><span class="line">任务 <span class="number">2</span></span><br><span class="line">任务 <span class="number">1</span></span><br><span class="line">任务 <span class="number">2</span></span><br><span class="line">任务 <span class="number">1</span></span><br><span class="line">任务 <span class="number">2</span></span><br><span class="line">任务 <span class="number">1</span></span><br><span class="line">----------- 结束 -----------</span><br><span class="line">回到主线程</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-延时执行的代码"><a href="#6-延时执行的代码" class="headerlink" title="6. 延时执行的代码"></a>6. 延时执行的代码</h3><p>当我们需要延迟执行一段代码时，就可以用到 <code>GCD</code> 的 <code>dispatch_after</code> 方法。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;----------- 开始 -----------&quot;</span>);</span><br><span class="line"></span><br><span class="line">dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(<span class="number">3</span> * <span class="built_in">NSEC_PER_SEC</span>)), dispatch_get_main_queue(), ^ &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;延迟 3 秒后执行的代码&quot;</span>); <span class="comment">// 更改秒数只要更改上面的数字 3 即可</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;----------- 结束 -----------&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>这个方法是异步执行的，所以不会卡住界面，从时间可以看出延迟了 <code>3</code> 秒后才打印的，下面是打印结果：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="number">2017</span><span class="number">-06</span><span class="number">-09</span> <span class="number">12</span>:<span class="number">28</span>:<span class="number">44.307</span> ----------- 开始 -----------</span><br><span class="line"><span class="number">2017</span><span class="number">-06</span><span class="number">-09</span> <span class="number">12</span>:<span class="number">28</span>:<span class="number">44.307</span> ----------- 结束 -----------</span><br><span class="line"><span class="number">2017</span><span class="number">-06</span><span class="number">-09</span> <span class="number">12</span>:<span class="number">28</span>:<span class="number">47.560</span> 延迟 <span class="number">3</span> 秒后执行的代码</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-只执行一次的代码"><a href="#7-只执行一次的代码" class="headerlink" title="7. 只执行一次的代码"></a>7. 只执行一次的代码</h3><p>使用下面方法执行的代码，在整个程序运行过程中，只会被执行一次，执行过一次以后就再也不会被执行，使用的是 <code>GCD</code> 的 <code>dispatch_once</code> 方法。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="built_in">dispatch_once_t</span> onceToken;</span><br><span class="line"><span class="built_in">dispatch_once</span>(&amp;onceToken, ^ &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;只执行一次的代码&quot;</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="8-同时执行多次的代码"><a href="#8-同时执行多次的代码" class="headerlink" title="8. 同时执行多次的代码"></a>8. 同时执行多次的代码</h3><p>通常我们会用 <code>for</code> 循环来使代码执行多次，但是 <code>GCD</code> 给我们提供了快速迭代的方法 <code>dispatch_apply</code> ，使我们可以将代码执行多次。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;----------- 开始 -----------&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">dispatch_queue_t</span> queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>);</span><br><span class="line">dispatch_apply(<span class="number">5</span>, queue, ^(size_t index) &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;同时执行多次的代码 %zd&quot;</span>,index); <span class="comment">// 更改上面的数字 5 即可更改执行次数</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;----------- 结束 -----------&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p><code>dispatch_apply</code> 和 <code>for</code> 循环是有区别的，<code>for</code> 循环是按顺序依次执行多次，而 <code>dispatch_apply</code> 是同时执行多次，可以看到下面的 <code>5</code> 次几乎是同一时间执行的，下面是打印结果：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">----------- 开始 -----------</span><br><span class="line">同时执行多次的代码 <span class="number">0</span></span><br><span class="line">同时执行多次的代码 <span class="number">2</span></span><br><span class="line">同时执行多次的代码 <span class="number">3</span></span><br><span class="line">同时执行多次的代码 <span class="number">1</span></span><br><span class="line">同时执行多次的代码 <span class="number">4</span></span><br><span class="line">----------- 结束 -----------</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-定时器"><a href="#9-定时器" class="headerlink" title="9. 定时器"></a>9. 定时器</h3><p>一般情况下，都是使用 <code>NSTimer</code> 来实现定时器，但是 <code>GCD</code> 其实也是可以实现定时器功能的，并且 <code>GCD</code> 定时器不受 <code>RunLoop</code> 约束，比 <code>NSTimer</code> 更加准时。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">ViewController</span> ()</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) dispatch_source_t timer; <span class="comment">// 定时器对象</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;----------- 开始 -----------&quot;</span>);</span><br><span class="line"></span><br><span class="line">__block <span class="built_in">NSInteger</span> time = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 获得队列 */</span></span><br><span class="line"><span class="built_in">dispatch_queue_t</span> queue = dispatch_get_global_queue(<span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 创建定时器（dispatch_source_t 本质还是一个 OC 对象） */</span></span><br><span class="line"><span class="keyword">self</span>.timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, <span class="number">0</span>, <span class="number">0</span>, queue);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 设置定时器属性 */</span></span><br><span class="line">dispatch_time_t start = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(<span class="number">1.0</span> * <span class="built_in">NSEC_PER_SEC</span>)); <span class="comment">// 1 秒后开始执行</span></span><br><span class="line">uint64_t interval = (uint64_t)(<span class="number">1.0</span> * <span class="built_in">NSEC_PER_SEC</span>); <span class="comment">// 每隔 1 秒执行一次</span></span><br><span class="line">dispatch_source_set_timer(<span class="keyword">self</span>.timer, start, interval, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 回调 */</span></span><br><span class="line">dispatch_source_set_event_handler(<span class="keyword">self</span>.timer, ^&#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;计时 %ld 秒&quot;</span>, ++time);</span><br><span class="line">    <span class="keyword">if</span> (time == <span class="number">5</span>) &#123;</span><br><span class="line">        <span class="comment">/* 取消定时器 */</span></span><br><span class="line">        dispatch_cancel(<span class="keyword">self</span>.timer);</span><br><span class="line">        <span class="keyword">self</span>.timer = <span class="literal">nil</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 启动定时器 */</span></span><br><span class="line">dispatch_resume(<span class="keyword">self</span>.timer);</span><br><span class="line"></span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;----------- 结束 -----------&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>下面是打印结果：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="number">2017</span><span class="number">-06</span><span class="number">-09</span> <span class="number">14</span>:<span class="number">55</span>:<span class="number">37.894</span> ----------- 开始 -----------</span><br><span class="line"><span class="number">2017</span><span class="number">-06</span><span class="number">-09</span> <span class="number">14</span>:<span class="number">55</span>:<span class="number">37.894</span> ----------- 结束 -----------</span><br><span class="line"><span class="number">2017</span><span class="number">-06</span><span class="number">-09</span> <span class="number">14</span>:<span class="number">55</span>:<span class="number">38.896</span> 计时 <span class="number">1</span> 秒</span><br><span class="line"><span class="number">2017</span><span class="number">-06</span><span class="number">-09</span> <span class="number">14</span>:<span class="number">55</span>:<span class="number">39.895</span> 计时 <span class="number">2</span> 秒</span><br><span class="line"><span class="number">2017</span><span class="number">-06</span><span class="number">-09</span> <span class="number">14</span>:<span class="number">55</span>:<span class="number">40.895</span> 计时 <span class="number">3</span> 秒</span><br><span class="line"><span class="number">2017</span><span class="number">-06</span><span class="number">-09</span> <span class="number">14</span>:<span class="number">55</span>:<span class="number">41.895</span> 计时 <span class="number">4</span> 秒</span><br><span class="line"><span class="number">2017</span><span class="number">-06</span><span class="number">-09</span> <span class="number">14</span>:<span class="number">55</span>:<span class="number">42.895</span> 计时 <span class="number">5</span> 秒</span><br></pre></td></tr></table></figure>
+
+<hr>
+<blockquote>
+<p>用法大概就这么多，有疑问或者不对的地方可以在下面留言，有需要的可以收藏一下。</p>
+</blockquote>
+<p><strong>我的传送门：</strong> <a href="https://karise.cn/">博客</a> 、<a target="_blank" rel="noopener" href="https://jianshu.com/u/63659e722f3b">简书</a> 、<a target="_blank" rel="noopener" href="https://weibo.com/karise">微博</a> 、<a target="_blank" rel="noopener" href="https://github.com/karise-guo">GitHub</a> 。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="爱吃鸭梨的猫 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="爱吃鸭梨的猫 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>爱吃鸭梨的猫
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://karise.cn/2017/06/09/iOS/201706091323/" title="【iOS 开发】多线程 GCD 的使用汇总">https://karise.cn/2017/06/09/iOS/201706091323/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/iOS-%E5%BC%80%E5%8F%91/" rel="tag"># iOS 开发</a>
+              <a href="/tags/GCD/" rel="tag"># GCD</a>
+              <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" rel="tag"># 多线程</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/06/06/iOS/201706062134/" rel="prev" title="【iOS 开发】SDWebImage 请求网络图片时设置请求头 Header">
+      <i class="fa fa-chevron-left"></i> 【iOS 开发】SDWebImage 请求网络图片时设置请求头 Header
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/06/09/Java/201706092354/" rel="next" title="【Java 开发】MySQL 开启远程连接的方法">
+      【Java 开发】MySQL 开启远程连接的方法 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#GCD-%E7%9A%84%E5%88%9B%E5%BB%BA"><span class="nav-text">GCD 的创建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E9%98%9F%E5%88%97%E7%9A%84%E5%88%9B%E5%BB%BA"><span class="nav-text">1. 队列的创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%BB%BB%E5%8A%A1%E7%9A%84%E5%88%9B%E5%BB%BA"><span class="nav-text">2. 任务的创建</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GCD-%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-text">GCD 的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E4%B8%B2%E8%A1%8C%E9%98%9F%E5%88%97-%E5%90%8C%E6%AD%A5%E6%89%A7%E8%A1%8C"><span class="nav-text">1. 串行队列 + 同步执行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%B8%B2%E8%A1%8C%E9%98%9F%E5%88%97-%E5%BC%82%E6%AD%A5%E6%89%A7%E8%A1%8C"><span class="nav-text">2. 串行队列 + 异步执行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%B9%B6%E5%8F%91%E9%98%9F%E5%88%97-%E5%BC%82%E6%AD%A5%E6%89%A7%E8%A1%8C"><span class="nav-text">3. 并发队列 + 异步执行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-notification-%E9%98%9F%E5%88%97%E7%BB%84%EF%BC%88%E5%BC%82%E6%AD%A5-%E5%B9%B6%E5%8F%91%EF%BC%89"><span class="nav-text">4. notification 队列组（异步 + 并发）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-wait-%E9%98%9F%E5%88%97%E7%BB%84%EF%BC%88%E5%90%8C%E6%AD%A5-%E5%B9%B6%E5%8F%91%EF%BC%89"><span class="nav-text">5. wait 队列组（同步 + 并发）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E5%BB%B6%E6%97%B6%E6%89%A7%E8%A1%8C%E7%9A%84%E4%BB%A3%E7%A0%81"><span class="nav-text">6. 延时执行的代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-%E5%8F%AA%E6%89%A7%E8%A1%8C%E4%B8%80%E6%AC%A1%E7%9A%84%E4%BB%A3%E7%A0%81"><span class="nav-text">7. 只执行一次的代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-%E5%90%8C%E6%97%B6%E6%89%A7%E8%A1%8C%E5%A4%9A%E6%AC%A1%E7%9A%84%E4%BB%A3%E7%A0%81"><span class="nav-text">8. 同时执行多次的代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-%E5%AE%9A%E6%97%B6%E5%99%A8"><span class="nav-text">9. 定时器</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="爱吃鸭梨的猫"
+      src="/images/cat.jpg">
+  <p class="site-author-name" itemprop="name">爱吃鸭梨的猫</p>
+  <div class="site-description" itemprop="description">创造财富 才是时间最正确的归宿</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">76</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">119</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/karise" title="微博 → http:&#x2F;&#x2F;weibo.com&#x2F;karise" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>微博</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:292710547@qq.com" title="邮箱 → mailto:292710547@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>邮箱</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.jianshu.com/u/63659e722f3b" title="简书 → http:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;63659e722f3b" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/karise-guo" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;karise-guo" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heartbeat"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱吃鸭梨的猫</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+  <div style="display: none;">
+    <script data-pjax src="//s95.cnzz.com/z_stat.php?id=1262401548&web_id=1262401548"></script>
+  </div>
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/npm/algoliasearch@4/dist/algoliasearch-lite.umd.js"></script>
+<script src="//cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
+<script src="/js/algolia-search.js"></script>
+
+
+
+
+
+
+
+  <script src="//code.tidio.co/koavrszo8ljadwqznhu3xloogrgfg7gt.js"></script>
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '96fe4c8974d2415f9fc0',
+      clientSecret: 'ece2551d6a09bfe9f9421ac6e85f1472daf6122c',
+      repo        : 'BlogComment',
+      owner       : 'karise-guo',
+      admin       : ['karise-guo'],
+      id          : 'efb98b54cb215a52fc5afaf68fcba2b4',
+        language: 'zh-CN',
+      distractionFreeMode: false
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+    </div>
+</body>
+</html>

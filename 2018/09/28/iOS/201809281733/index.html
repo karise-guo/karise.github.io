@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/cat.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/cat.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/cat.jpg">
+  <link rel="mask-icon" href="/images/cat.jpg" color="#222">
+  <meta name="google-site-verification" content="6FbWia2UHu0Rj0-k91-sJlCX_0u5twNvlB9Nha097oc">
+  <meta name="baidu-site-verification" content="fecPuO9wLA">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"karise.cn","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"appID":"6R1TPR58SX","apiKey":"b7b85229dc744164111c058bfea5448c","indexName":"Karise","hits":{"per_page":10},"labels":{"input_placeholder":"请输入搜索内容...","hits_empty":"没有搜索到关于 “${query}” 的任何内容。","hits_stats":"一共搜索到 ${hits} 个结果，使用了 ${time} 毫秒。"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Carthage 是一款 iOS 项目依赖管理工具，与 Cocoapods 有着相似的功能，可以帮助你方便的管理第三方依赖，它会把三方依赖编译成 framework ，以 framework 的形式将三方依赖加入到项目中进行使用和管理，下面记录一下项目添加 Carthage 支持的方法以及 Carthage 的使用方法，方便日后查看。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【iOS 开发】给自己项目添加 Carthage 支持的方法">
+<meta property="og:url" content="https://karise.cn/2018/09/28/iOS/201809281733/index.html">
+<meta property="og:site_name" content="爱吃鸭梨的猫">
+<meta property="og:description" content="Carthage 是一款 iOS 项目依赖管理工具，与 Cocoapods 有着相似的功能，可以帮助你方便的管理第三方依赖，它会把三方依赖编译成 framework ，以 framework 的形式将三方依赖加入到项目中进行使用和管理，下面记录一下项目添加 Carthage 支持的方法以及 Carthage 的使用方法，方便日后查看。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://file.karise.cn/blog/57368036-c8e8c880-71bc-11e9-9914-66615c83424c.jpg">
+<meta property="article:published_time" content="2018-09-28T09:33:00.000Z">
+<meta property="article:modified_time" content="2022-11-11T09:44:54.939Z">
+<meta property="article:author" content="爱吃鸭梨的猫">
+<meta property="article:tag" content="iOS">
+<meta property="article:tag" content="Carthage">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://file.karise.cn/blog/57368036-c8e8c880-71bc-11e9-9914-66615c83424c.jpg">
+
+<link rel="canonical" href="https://karise.cn/2018/09/28/iOS/201809281733/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【iOS 开发】给自己项目添加 Carthage 支持的方法 | 爱吃鸭梨的猫</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-101397377-1"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-101397377-1');
+      }
+    </script>
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?23e551cb7374b653d003004a84ced259";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="爱吃鸭梨的猫" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta custom-logo">
+      <div class="site-meta-headline">
+        <a>
+          <img class="custom-logo-image" src="/images/cat.jpg" alt="爱吃鸭梨的猫">
+        </a>
+      </div>
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">爱吃鸭梨的猫</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">创造财富 才是时间最正确的归宿</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>博客首页</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/catalog/" rel="section"><i class="fa fa-fw fa-list-ul"></i>博文目录</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-folder-open"></i>文章分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-cloud"></i>标签云集</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-hourglass-half"></i>我的历程</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/message/" rel="section"><i class="fa fa-fw fa-commenting"></i>给我留言</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于博主</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索文章
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="algolia-results">
+  <div id="algolia-stats"></div>
+  <div id="algolia-hits"></div>
+  <div id="algolia-pagination" class="algolia-pagination"></div>
+</div>
+
+      
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://karise.cn/2018/09/28/iOS/201809281733/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/cat.jpg">
+      <meta itemprop="name" content="爱吃鸭梨的猫">
+      <meta itemprop="description" content="创造财富 才是时间最正确的归宿">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="爱吃鸭梨的猫">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【iOS 开发】给自己项目添加 Carthage 支持的方法
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-09-28 17:33:00" itemprop="dateCreated datePublished" datetime="2018-09-28T17:33:00+08:00">2018-09-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-11-11 17:44:54" itemprop="dateModified" datetime="2022-11-11T17:44:54+08:00">2022-11-11</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS-%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">iOS 开发</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+            <img src="https://file.karise.cn/blog/57368036-c8e8c880-71bc-11e9-9914-66615c83424c.jpg" itemprop="contentUrl">
+        </div>
+        <blockquote>
+<p><code>Carthage</code> 是一款 <code>iOS</code> 项目依赖管理工具，与 <code>Cocoapods</code> 有着相似的功能，可以帮助你方便的管理第三方依赖，它会把三方依赖编译成 <code>framework</code> ，以 <code>framework</code> 的形式将三方依赖加入到项目中进行使用和管理，下面记录一下项目添加 <code>Carthage</code> 支持的方法以及 <code>Carthage</code> 的使用方法，方便日后查看。</p>
+</blockquote>
+<a id="more"></a>
+
+<hr>
+<h2 id="项目添加-Carthage-支持"><a href="#项目添加-Carthage-支持" class="headerlink" title="项目添加 Carthage 支持"></a>项目添加 Carthage 支持</h2><h3 id="1-安装-Carthage"><a href="#1-安装-Carthage" class="headerlink" title="1. 安装 Carthage"></a>1. 安装 Carthage</h3><p>可以到 <a target="_blank" rel="noopener" href="https://github.com/Carthage/Carthage/releases">Carthage 项目</a> 下直接下载 <code>Carthage.pkg</code> 文件安装，或者使用 <code>Homebrew</code> 方式安装，终端输入以下命令进行安装。</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">brew update</span><br><span class="line">brew install carthage</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-创建一个支持-Carthage-的工程"><a href="#2-创建一个支持-Carthage-的工程" class="headerlink" title="2. 创建一个支持 Carthage 的工程"></a>2. 创建一个支持 Carthage 的工程</h3><ul>
+<li><code>Carthage</code> 仅支持 <code>dynamic frameworks</code> 也就是动态库，可以新建一个工程或者在现有工程下创建一个新的 <code>target</code> ，类型需要选择 <code>Coaoa Touch Framework</code> 。</li>
+</ul>
+<p><img data-src="https://file.karise.cn/blog/20190509171953.jpg"></p>
+<ul>
+<li>打开项目配置，选择 <code>framework target</code> 的 <code>Build Phases</code> ，将需要暴露的 <code>.h</code> 文件拖拽到 <code>Public</code> 里面，将相应的 <code>.m</code> 文件拖拽到 <code>Compile source</code> 里面。</li>
+<li>如果你的 <code>framework target</code> 名称与你想要打包构建的 <code>framework</code> 名称不一致，选中 <code>Build Settings</code> 选项卡，搜索 <code>Packaging</code> ，把 <code>Produce Module Name</code> 和 <code>Produce Name</code> 改成你想要构建的 <code>framework</code> 名称。</li>
+<li>如果你使用了类别，那么你需要在 <code>Build Settings</code> 的 <code>Linking</code> 的 <code>Other Linker Flags</code> 里加上 <code>-all_load</code> 。</li>
+<li>如果你想你的工程支持 <code>bitcode</code> ，需要在 <code>Other C Flags</code> 里加上 <code>-fembed-bitcode</code> 。</li>
+<li>由于 <code>Carthage</code> 在 <code>build</code> 时，会自动将设置为 <code>Shared</code> 的 <code>framework target</code> 构建成 <code>framework</code> ，所以需要单击顶部 <code>target</code> ，在弹出选项中选中 <code>Manager Schemes</code>  ，将 <code>framework target</code> 的 <code>Shared</code> 选项选中。</li>
+</ul>
+<h3 id="3-构建-framework"><a href="#3-构建-framework" class="headerlink" title="3. 构建 framework"></a>3. 构建 framework</h3><ul>
+<li><p>打开终端 <code>cd</code> 到工程目录下，执行以下命令开始打包 <code>framework</code> ，执行完成后会自动将 <code>framework</code> 文件保存在工程的 <code>Carthage/Build</code> 文件夹下。</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">carthage build --no-skip-current</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>然后将生成的 <code>framework</code> 文件拖进测试项目进行测试即可，具体就不说了。</p>
+</li>
+</ul>
+<h3 id="4-发布并打上-tag"><a href="#4-发布并打上-tag" class="headerlink" title="4. 发布并打上 tag"></a>4. 发布并打上 tag</h3><ul>
+<li><p>测试没问题后，将工程 <code>push</code> 并打上 <code>tag</code> 即可，<code>tag</code> 名称必须是版本号。</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">git tag 1.0.0</span><br><span class="line">git push --tags</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>这样你的项目就已经支持 <code>Carthage</code> 了，其他开发者就可以使用 <code>Carthage</code> 来管理你的项目依赖了，只需要将 <code>framework</code> 工程 <code>push</code> 上去即可，打包生成的测试 <code>framework</code> 文件不需要 <code>push</code>。</p>
+</li>
+</ul>
+<h2 id="使用-Cathage-依赖第三方库"><a href="#使用-Cathage-依赖第三方库" class="headerlink" title="使用 Cathage 依赖第三方库"></a>使用 Cathage 依赖第三方库</h2><h3 id="1-创建并编辑-Cartfile"><a href="#1-创建并编辑-Cartfile" class="headerlink" title="1. 创建并编辑 Cartfile"></a>1. 创建并编辑 Cartfile</h3><ul>
+<li><p>在工程目录下创建一个名为 <a target="_blank" rel="noopener" href="https://link.jianshu.com/?t=https://github.com/Carthage/Carthage/blob/master/Documentation/Artifacts.md#cartfile">Cartfile</a> 的文件，可以使用以下命令创建。</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">touch Cartfile</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>然后在  <a target="_blank" rel="noopener" href="https://link.jianshu.com/?t=https://github.com/Carthage/Carthage/blob/master/Documentation/Artifacts.md#cartfile">Cartfile</a> 文件中指明想要依赖的第三方库。</p>
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="attr">github</span> <span class="string">&quot;ReactiveCocoa/ReactiveCocoa&quot; // 不指定版本</span></span><br><span class="line"><span class="attr">github</span> <span class="string">&quot;ReactiveCocoa/ReactiveCocoa&quot; &gt;= 1.0.0 // 大于等于 1.0.0 版本</span></span><br><span class="line"><span class="attr">github</span> <span class="string">&quot;ReactiveCocoa/ReactiveCocoa&quot; ~&gt; 1.0.0 // 1.0.0 及以上的兼容版本 &lt; 2.0.0</span></span><br><span class="line"><span class="attr">github</span> <span class="string">&quot;ReactiveCocoa/ReactiveCocoa&quot; == 1.0.0 // 指定为 1.0.0 版本</span></span><br><span class="line"><span class="attr">github</span> <span class="string">&quot;ReactiveCocoa/ReactiveCocoa&quot; &quot;branch&quot; // 指定特定的分支、tag</span></span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h3 id="2-更新并构建-framework"><a href="#2-更新并构建-framework" class="headerlink" title="2. 更新并构建 framework"></a>2. 更新并构建 framework</h3><ul>
+<li><p>编辑完成后，在终端中 <code>cd</code> 到  <a target="_blank" rel="noopener" href="https://link.jianshu.com/?t=https://github.com/Carthage/Carthage/blob/master/Documentation/Artifacts.md#cartfile">Cartfile</a> 所在目录下，执行以下命令构建第三方库的 <code>framework</code> 。</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">carthage update --platform iOS</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>执行完成后会自动将第三方库 <code>clone</code> 到 <a target="_blank" rel="noopener" href="https://link.jianshu.com/?t=https://github.com/Carthage/Carthage/blob/master/Documentation/Artifacts.md#carthagecheckouts">Carthage/Checkouts</a> 文件夹下，然后会自动打包成相应的 <code>framework</code> 文件，打包完的文件会保存在 <a target="_blank" rel="noopener" href="https://link.jianshu.com/?t=https://github.com/Carthage/Carthage/blob/master/Documentation/Artifacts.md#carthagebuild">Carthage/Build</a> 文件夹下。</p>
+</li>
+</ul>
+<h3 id="3-工程配置"><a href="#3-工程配置" class="headerlink" title="3. 工程配置"></a>3. 工程配置</h3><ul>
+<li><p>打开工程 <code>target</code> 的 <code>General</code> 配置，将 <a target="_blank" rel="noopener" href="https://link.jianshu.com/?t=https://github.com/Carthage/Carthage/blob/master/Documentation/Artifacts.md#carthagebuild">Carthage/Build</a> 下生成的 <code>framework</code> 文件拖拽到 <code>Linked Frameworks and Libraries</code> 选项中。</p>
+</li>
+<li><p>打开工程 <code>target</code> 的 <code>Build Phases</code>  配置，点击 <code>+</code> 选择 <code>New Run Script Phase</code> ，创建一个 <code>Script</code> ，添加以下内容：</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">/usr/<span class="built_in">local</span>/bin/carthage copy-frameworks</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>然后添加相应的内容到下面的 <code>Input Files</code>（举例）：</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">$(SRCROOT)/Carthage/Build/iOS/ReactiveCocoa.framework</span><br></pre></td></tr></table></figure>
+
+<p><img data-src="https://file.karise.cn/blog/20190509172008.jpg"></p>
+</li>
+<li><p>这个脚本是为了处理 <a target="_blank" rel="noopener" href="https://link.jianshu.com/?t=http://www.openradar.me/radar?id=6409498411401216">App Store 提交的 bug</a>，解决 <code>App</code> 因为使用的 <code>frameworks</code> 包含二进制图像的 <code>iOS</code> 模拟器在提交 <code>App Store</code> 时会被自动拒绝的问题。</p>
+</li>
+</ul>
+<h3 id="4-Cathage-的目录结构"><a href="#4-Cathage-的目录结构" class="headerlink" title="4. Cathage 的目录结构"></a>4. Cathage 的目录结构</h3><p>在使用 <code>Carthage</code>  管理 <code>frameworks</code> 时，工程根目录下与 <code>Cartfile</code> 同级的会存在 <code>Cartfile.resolved</code> 文件和<br> <code>Carthage</code> 文件夹，<code>Carthage</code> 文件夹又包含 <code>Build</code> 和 <code>Checkouts</code>两个文件夹。</p>
+<ul>
+<li><code>Cartfile.resolved</code>文件<br> 包含已经添加的 <code>frameworks</code> 信息，包括依赖名称和当前使用的版本信息。</li>
+<li><code>Checkouts</code> 文件夹<br> 包含所有 <code>frameworks</code> 源码信息，在执行 <code>carthage build</code> 时，会直接使用里面的 <code>project</code> 或者 <code>workspace</code> 相应的 <code>scheme</code> 来构建相应的 <code>framework</code> 。</li>
+<li><code>Build</code> 文件夹<br> 包含所有的二进制构建结果，包括 <code>.framework</code> 二进制文件和 <code>.dSYM</code> 等文件。</li>
+</ul>
+<hr>
+<p><strong>我的传送门：</strong> <a href="https://karise.cn/">博客</a> 、<a target="_blank" rel="noopener" href="https://jianshu.com/u/63659e722f3b">简书</a> 、<a target="_blank" rel="noopener" href="https://weibo.com/karise">微博</a> 、<a target="_blank" rel="noopener" href="https://github.com/karise-guo">GitHub</a> 。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="爱吃鸭梨的猫 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="爱吃鸭梨的猫 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>爱吃鸭梨的猫
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://karise.cn/2018/09/28/iOS/201809281733/" title="【iOS 开发】给自己项目添加 Carthage 支持的方法">https://karise.cn/2018/09/28/iOS/201809281733/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/iOS/" rel="tag"># iOS</a>
+              <a href="/tags/Carthage/" rel="tag"># Carthage</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/09/18/Mac/201809181727/" rel="prev" title="mac 上配置 aria2 加快下载速度的方法">
+      <i class="fa fa-chevron-left"></i> mac 上配置 aria2 加快下载速度的方法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/09/29/iOS/201809291052/" rel="next" title="【iOS 开发】利用 Carthage 将项目打包 Framework 并依赖 CocoaPods 第三方库的方法">
+      【iOS 开发】利用 Carthage 将项目打包 Framework 并依赖 CocoaPods 第三方库的方法 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E6%B7%BB%E5%8A%A0-Carthage-%E6%94%AF%E6%8C%81"><span class="nav-text">项目添加 Carthage 支持</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%AE%89%E8%A3%85-Carthage"><span class="nav-text">1. 安装 Carthage</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E6%94%AF%E6%8C%81-Carthage-%E7%9A%84%E5%B7%A5%E7%A8%8B"><span class="nav-text">2. 创建一个支持 Carthage 的工程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%9E%84%E5%BB%BA-framework"><span class="nav-text">3. 构建 framework</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E5%8F%91%E5%B8%83%E5%B9%B6%E6%89%93%E4%B8%8A-tag"><span class="nav-text">4. 发布并打上 tag</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-Cathage-%E4%BE%9D%E8%B5%96%E7%AC%AC%E4%B8%89%E6%96%B9%E5%BA%93"><span class="nav-text">使用 Cathage 依赖第三方库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%88%9B%E5%BB%BA%E5%B9%B6%E7%BC%96%E8%BE%91-Cartfile"><span class="nav-text">1. 创建并编辑 Cartfile</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%9B%B4%E6%96%B0%E5%B9%B6%E6%9E%84%E5%BB%BA-framework"><span class="nav-text">2. 更新并构建 framework</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%B7%A5%E7%A8%8B%E9%85%8D%E7%BD%AE"><span class="nav-text">3. 工程配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Cathage-%E7%9A%84%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84"><span class="nav-text">4. Cathage 的目录结构</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="爱吃鸭梨的猫"
+      src="/images/cat.jpg">
+  <p class="site-author-name" itemprop="name">爱吃鸭梨的猫</p>
+  <div class="site-description" itemprop="description">创造财富 才是时间最正确的归宿</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">76</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">119</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/karise" title="微博 → http:&#x2F;&#x2F;weibo.com&#x2F;karise" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>微博</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:292710547@qq.com" title="邮箱 → mailto:292710547@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>邮箱</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.jianshu.com/u/63659e722f3b" title="简书 → http:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;63659e722f3b" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/karise-guo" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;karise-guo" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heartbeat"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱吃鸭梨的猫</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+  <div style="display: none;">
+    <script data-pjax src="//s95.cnzz.com/z_stat.php?id=1262401548&web_id=1262401548"></script>
+  </div>
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/npm/algoliasearch@4/dist/algoliasearch-lite.umd.js"></script>
+<script src="//cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
+<script src="/js/algolia-search.js"></script>
+
+
+
+
+
+
+
+  <script src="//code.tidio.co/koavrszo8ljadwqznhu3xloogrgfg7gt.js"></script>
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '96fe4c8974d2415f9fc0',
+      clientSecret: 'ece2551d6a09bfe9f9421ac6e85f1472daf6122c',
+      repo        : 'BlogComment',
+      owner       : 'karise-guo',
+      admin       : ['karise-guo'],
+      id          : '4912b932ee5bb78432191f66ba33ce17',
+        language: 'zh-CN',
+      distractionFreeMode: false
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+    </div>
+</body>
+</html>

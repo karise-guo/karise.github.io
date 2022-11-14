@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/cat.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/cat.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/cat.jpg">
+  <link rel="mask-icon" href="/images/cat.jpg" color="#222">
+  <meta name="google-site-verification" content="6FbWia2UHu0Rj0-k91-sJlCX_0u5twNvlB9Nha097oc">
+  <meta name="baidu-site-verification" content="fecPuO9wLA">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"karise.cn","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"appID":"6R1TPR58SX","apiKey":"b7b85229dc744164111c058bfea5448c","indexName":"Karise","hits":{"per_page":10},"labels":{"input_placeholder":"请输入搜索内容...","hits_empty":"没有搜索到关于 “${query}” 的任何内容。","hits_stats":"一共搜索到 ${hits} 个结果，使用了 ${time} 毫秒。"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="RAC 指的就是 RactiveCocoa ，是 Github 的一个开源框架，能够帮我们提供大量方便的事件处理方案，让我们更简单粗暴地去处理事件，现在分为 ReactiveObjC 和 ReactiveSwift ，两个框架的功能使用相似，由于正好在学习这个然后公司项目是用 OC 写的，所以将 ReactiveObjC 的使用方法记录一下。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【iOS 开发】ReactiveObjC（RAC）的使用汇总">
+<meta property="og:url" content="https://karise.cn/2017/06/16/iOS/201706161157/index.html">
+<meta property="og:site_name" content="爱吃鸭梨的猫">
+<meta property="og:description" content="RAC 指的就是 RactiveCocoa ，是 Github 的一个开源框架，能够帮我们提供大量方便的事件处理方案，让我们更简单粗暴地去处理事件，现在分为 ReactiveObjC 和 ReactiveSwift ，两个框架的功能使用相似，由于正好在学习这个然后公司项目是用 OC 写的，所以将 ReactiveObjC 的使用方法记录一下。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://file.karise.cn/blog/57366757-419a5580-71ba-11e9-9786-eba84a200fdc.png">
+<meta property="article:published_time" content="2017-06-16T03:57:00.000Z">
+<meta property="article:modified_time" content="2022-11-11T09:44:54.936Z">
+<meta property="article:author" content="爱吃鸭梨的猫">
+<meta property="article:tag" content="iOS 开发">
+<meta property="article:tag" content="RAC">
+<meta property="article:tag" content="RactiveCocoa">
+<meta property="article:tag" content="ReactiveObjC">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://file.karise.cn/blog/57366757-419a5580-71ba-11e9-9786-eba84a200fdc.png">
+
+<link rel="canonical" href="https://karise.cn/2017/06/16/iOS/201706161157/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【iOS 开发】ReactiveObjC（RAC）的使用汇总 | 爱吃鸭梨的猫</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-101397377-1"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-101397377-1');
+      }
+    </script>
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?23e551cb7374b653d003004a84ced259";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="爱吃鸭梨的猫" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta custom-logo">
+      <div class="site-meta-headline">
+        <a>
+          <img class="custom-logo-image" src="/images/cat.jpg" alt="爱吃鸭梨的猫">
+        </a>
+      </div>
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">爱吃鸭梨的猫</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">创造财富 才是时间最正确的归宿</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>博客首页</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/catalog/" rel="section"><i class="fa fa-fw fa-list-ul"></i>博文目录</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-folder-open"></i>文章分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-cloud"></i>标签云集</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-hourglass-half"></i>我的历程</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/message/" rel="section"><i class="fa fa-fw fa-commenting"></i>给我留言</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于博主</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索文章
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="algolia-results">
+  <div id="algolia-stats"></div>
+  <div id="algolia-hits"></div>
+  <div id="algolia-pagination" class="algolia-pagination"></div>
+</div>
+
+      
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://karise.cn/2017/06/16/iOS/201706161157/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/cat.jpg">
+      <meta itemprop="name" content="爱吃鸭梨的猫">
+      <meta itemprop="description" content="创造财富 才是时间最正确的归宿">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="爱吃鸭梨的猫">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【iOS 开发】ReactiveObjC（RAC）的使用汇总
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-06-16 11:57:00" itemprop="dateCreated datePublished" datetime="2017-06-16T11:57:00+08:00">2017-06-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-11-11 17:44:54" itemprop="dateModified" datetime="2022-11-11T17:44:54+08:00">2022-11-11</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS-%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">iOS 开发</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+            <img src="https://file.karise.cn/blog/57366757-419a5580-71ba-11e9-9786-eba84a200fdc.png" itemprop="contentUrl">
+        </div>
+        <blockquote>
+<p><code>RAC</code> 指的就是 <code>RactiveCocoa</code> ，是 <code>Github</code> 的一个开源框架，能够帮我们提供大量方便的事件处理方案，让我们更简单粗暴地去处理事件，现在分为 <code>ReactiveObjC</code> 和 <code>ReactiveSwift</code> ，两个框架的功能使用相似，由于正好在学习这个然后公司项目是用 <code>OC</code> 写的，所以将 <code>ReactiveObjC</code> 的使用方法记录一下。</p>
+</blockquote>
+<a id="more"></a>
+
+<hr>
+<h2 id="ReactiveObjC-的使用"><a href="#ReactiveObjC-的使用" class="headerlink" title="ReactiveObjC 的使用"></a>ReactiveObjC 的使用</h2><p><code>RAC</code> 的核心思想：<code>创建信号</code> - <code>订阅信号</code> - <code>发送信号</code> ，并且在 <code>RAC</code> 中我们会看到大量的 <code>block</code> ，所以在使用之前可以再重新温习一下 <code>block</code> 的使用。</p>
+<h3 id="1-RACSignal-信号"><a href="#1-RACSignal-信号" class="headerlink" title="1. RACSignal 信号"></a>1. RACSignal 信号</h3><figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 创建信号 */</span></span><br><span class="line">RACSignal *signal = [RACSignal createSignal:^RACDisposable * _Nullable(<span class="keyword">id</span>&lt;RACSubscriber&gt;  _Nonnull subscriber) &#123;</span><br><span class="line">    [subscriber sendNext:<span class="string">@&quot;发送信号&quot;</span>];</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>;</span><br><span class="line">&#125;];</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 订阅信号 */</span></span><br><span class="line">RACDisposable *disposable = [signal subscribeNext:^(<span class="keyword">id</span>  _Nullable x) &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;信号内容：%@&quot;</span>, x);</span><br><span class="line">&#125;];</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 取消订阅 */</span></span><br><span class="line">[disposable dispose];</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-RACSubject-信号"><a href="#2-RACSubject-信号" class="headerlink" title="2. RACSubject 信号"></a>2. RACSubject 信号</h3><p>和代理的用法类似，通常用来代替代理，有了它，就不必要定义代理了。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 创建信号 */</span></span><br><span class="line">RACSubject *subject = [RACSubject subject];</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 发送信号 */</span></span><br><span class="line">[subject sendNext:<span class="string">@&quot;发送信号&quot;</span>];</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 订阅信号（通常在别的视图控制器中订阅，与代理的用法类似） */</span></span><br><span class="line">[subject subscribeNext:^(<span class="keyword">id</span>  _Nullable x) &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;信号内容：%@&quot;</span>, x);</span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-RACTuple-元祖"><a href="#3-RACTuple-元祖" class="headerlink" title="3. RACTuple 元祖"></a>3. RACTuple 元祖</h3><p><code>RAC</code> 的元祖，跟我们 <code>OC</code> 的数组其实是一样的，它其实就是封装了我们 <code>OC</code> 的数组。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 创建元祖 */</span></span><br><span class="line">RACTuple *tuple = [RACTuple tupleWithObjects:<span class="string">@&quot;1&quot;</span>, <span class="string">@&quot;2&quot;</span>, <span class="string">@&quot;3&quot;</span>, <span class="string">@&quot;4&quot;</span>, <span class="string">@&quot;5&quot;</span>, <span class="literal">nil</span>];</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 从别的数组中获取内容 */</span></span><br><span class="line">RACTuple *tuple = [RACTuple tupleWithObjectsFromArray:@[<span class="string">@&quot;1&quot;</span>, <span class="string">@&quot;2&quot;</span>, <span class="string">@&quot;3&quot;</span>, <span class="string">@&quot;4&quot;</span>, <span class="string">@&quot;5&quot;</span>]];</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 利用 RAC 宏快速封装 */</span></span><br><span class="line">RACTuple *tuple = RACTuplePack(<span class="string">@&quot;1&quot;</span>, <span class="string">@&quot;2&quot;</span>, <span class="string">@&quot;3&quot;</span>, <span class="string">@&quot;4&quot;</span>, <span class="string">@&quot;5&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;取元祖内容：%@&quot;</span>, tuple[<span class="number">0</span>]);</span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;第一个元素：%@&quot;</span>, [tuple first]);</span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;最后一个元素：%@&quot;</span>, [tuple last]);</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-便利-Array-数组和-Dictionary-字典"><a href="#4-便利-Array-数组和-Dictionary-字典" class="headerlink" title="4. 便利 Array 数组和 Dictionary 字典"></a>4. 便利 Array 数组和 Dictionary 字典</h3><p>可以省去使用 <code>for</code> 循环来遍历。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 遍历数组 */</span></span><br><span class="line"><span class="built_in">NSArray</span> *array = @[<span class="string">@&quot;1&quot;</span>, <span class="string">@&quot;2&quot;</span>, <span class="string">@&quot;3&quot;</span>, <span class="string">@&quot;4&quot;</span>, <span class="string">@&quot;5&quot;</span>];</span><br><span class="line">[array.rac_sequence.signal subscribeNext:^(<span class="keyword">id</span>  _Nullable x) &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;数组内容：%@&quot;</span>, x); <span class="comment">// x 可以是任何对象</span></span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 遍历字典 */</span></span><br><span class="line"><span class="built_in">NSDictionary</span> *dictionary = @&#123;<span class="string">@&quot;key1&quot;</span>:<span class="string">@&quot;value1&quot;</span>, <span class="string">@&quot;key2&quot;</span>:<span class="string">@&quot;value2&quot;</span>, <span class="string">@&quot;key3&quot;</span>:<span class="string">@&quot;value3&quot;</span>&#125;;</span><br><span class="line">[dictionary.rac_sequence.signal subscribeNext:^(RACTuple * _Nullable x) &#123;</span><br><span class="line">    RACTupleUnpack(<span class="built_in">NSString</span> *key, <span class="built_in">NSString</span> *value) = x; <span class="comment">// x 是一个元祖，这个宏能够将 key 和 value 拆开</span></span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;字典内容：%@:%@&quot;</span>, key, value);</span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
+
+<p>下面两个方法都是将数组内容全部换为 <code>0</code> ，第一个是单个操作，，第二个是一次性全部替换，两个方法都不会改变原数组内容，操作完后都会生成一个新的数组，省去了创建可变数组然后遍历出来单个添加的步骤。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 内容操作 */</span></span><br><span class="line"><span class="built_in">NSArray</span> *array = @[<span class="string">@&quot;1&quot;</span>, <span class="string">@&quot;2&quot;</span>, <span class="string">@&quot;3&quot;</span>, <span class="string">@&quot;4&quot;</span>, <span class="string">@&quot;5&quot;</span>];</span><br><span class="line"><span class="built_in">NSArray</span> *newArray = [[array.rac_sequence map:^<span class="keyword">id</span> _Nullable(<span class="keyword">id</span>  _Nullable value) &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;数组内容：%@&quot;</span>, value);</span><br><span class="line">    <span class="keyword">return</span> <span class="string">@&quot;0&quot;</span>; <span class="comment">// 将所有内容替换为 0</span></span><br><span class="line">&#125;] array];</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 内容快速替换 */</span></span><br><span class="line"><span class="built_in">NSArray</span> *array = @[<span class="string">@&quot;1&quot;</span>, <span class="string">@&quot;2&quot;</span>, <span class="string">@&quot;3&quot;</span>, <span class="string">@&quot;4&quot;</span>, <span class="string">@&quot;5&quot;</span>];</span><br><span class="line"><span class="built_in">NSArray</span> *newArray = [[array.rac_sequence mapReplace:<span class="string">@&quot;0&quot;</span>] array]; <span class="comment">// 将所有内容替换为 0</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-监听-TextField-的输入改变"><a href="#5-监听-TextField-的输入改变" class="headerlink" title="5. 监听 TextField 的输入改变"></a>5. 监听 TextField 的输入改变</h3><p>可以省去设置 <code>delegate</code> 和实现代理方法的步骤。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 监听 TextField 的输入（内容改变就会调用） */</span></span><br><span class="line">[[textField rac_textSignal] subscribeNext:^(<span class="built_in">NSString</span> * _Nullable x) &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;输入框内容：%@&quot;</span>, x);</span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 添加监听条件 */</span></span><br><span class="line">[[textField.rac_textSignal filter:^<span class="built_in">BOOL</span>(<span class="built_in">NSString</span> * _Nullable value) &#123;</span><br><span class="line">    <span class="keyword">return</span> value.length &gt; <span class="number">5</span>; <span class="comment">// 表示输入文字长度 &gt; 5 时才会调用下面的 block</span></span><br><span class="line">&#125;] subscribeNext:^(<span class="built_in">NSString</span> * _Nullable x) &#123;</span><br><span class="line">     <span class="built_in">NSLog</span>(<span class="string">@&quot;输入框内容：%@&quot;</span>, x);</span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-监听-Button-点击事件"><a href="#6-监听-Button-点击事件" class="headerlink" title="6. 监听 Button 点击事件"></a>6. 监听 Button 点击事件</h3><p>可以省去 <code>addTarget</code> 添加事件和创建方法的步骤。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">[[button rac_signalForControlEvents:<span class="built_in">UIControlEventTouchUpInside</span>] subscribeNext:^(__kindof <span class="built_in">UIControl</span> * _Nullable x) &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;%@ 按钮被点击了&quot;</span>, x); <span class="comment">// x 是 button 按钮对象</span></span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-登录按钮状态实时监听"><a href="#7-登录按钮状态实时监听" class="headerlink" title="7. 登录按钮状态实时监听"></a>7. 登录按钮状态实时监听</h3><p>下面表示只有 <code>用户名</code> 和 <code>密码</code> 输入框内容都大于 <code>0</code> 时，<code>登录</code> 按钮才可以点击，而且状态是实时监听的，一句代码就能完成这个功能。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">RAC(_loginButton, enabled) = [RACSignal combineLatest:@[_username.rac_textSignal, _password.rac_textSignal] reduce:^<span class="keyword">id</span> _Nullable(<span class="built_in">NSString</span> * username, <span class="built_in">NSString</span> * password)&#123;</span><br><span class="line">    <span class="keyword">return</span> @(username.length &amp;&amp; password.length);</span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
+
+<h3 id="8-监听-Notification-通知事件"><a href="#8-监听-Notification-通知事件" class="headerlink" title="8. 监听 Notification 通知事件"></a>8. 监听 Notification 通知事件</h3><p>可省去在 <code>-(void)dealloc &#123;&#125;</code> 中清除通知和监听通知创建方法的步骤。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">[[[<span class="built_in">NSNotificationCenter</span> defaultCenter] rac_addObserverForName:<span class="built_in">UIKeyboardDidShowNotification</span> object:<span class="literal">nil</span>] subscribeNext:^(<span class="built_in">NSNotification</span> * _Nullable x) &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;%@ 键盘弹起&quot;</span>, x); <span class="comment">// x 是通知对象</span></span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-代替-Delegate-代理方法"><a href="#9-代替-Delegate-代理方法" class="headerlink" title="9. 代替 Delegate 代理方法"></a>9. 代替 Delegate 代理方法</h3><p>可以省去监听以及设置 <code>delegate</code> 的步骤，下面表示只要 <code>view</code> 中执行了 <code>btnClick</code> 这个方法，就会发送信号执行这个回调。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">[[view rac_signalForSelector:<span class="keyword">@selector</span>(btnClick)] subscribeNext:^(RACTuple * _Nullable x) &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot; view 中的按钮被点击了&quot;</span>);</span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
+
+<h3 id="10-代替-KVO-监听"><a href="#10-代替-KVO-监听" class="headerlink" title="10. 代替 KVO 监听"></a>10. 代替 KVO 监听</h3><p>可以代替 <code>KVO</code> 监听，下面表示把监听 <code>view</code> 的 <code>frame</code> 属性改变转换成信号，只要值改变就会发送信号。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">[[view rac_valuesForKeyPath:<span class="string">@&quot;frame&quot;</span> observer:<span class="keyword">self</span>] subscribeNext:^(<span class="keyword">id</span>  _Nullable x) &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;属性的改变：%@&quot;</span>, x); <span class="comment">// x 是监听属性的改变结果</span></span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
+
+<p>还有一种更简单的写法，就是利用 <code>RAC</code> 的宏，和上面的效果是一样的。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">[RACObserve(view, frame) subscribeNext:^(<span class="keyword">id</span>  _Nullable x) &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;属性的改变：%@&quot;</span>, x); <span class="comment">// x 是监听属性的改变结果</span></span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
+
+<h3 id="11-代替-NSTimer-计时器"><a href="#11-代替-NSTimer-计时器" class="headerlink" title="11. 代替 NSTimer 计时器"></a>11. 代替 NSTimer 计时器</h3><p>可以代替 <code>NSTimer</code> 使用。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">ViewController</span> ()</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) RACDisposable *disposable;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 定义计时器监听 */</span></span><br><span class="line"><span class="keyword">self</span>.disposable = [[RACSignal interval:<span class="number">1.0</span> onScheduler:[RACScheduler mainThreadScheduler]] subscribeNext:^(<span class="built_in">NSDate</span> * _Nullable x) &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;当前时间：%@&quot;</span>, x); <span class="comment">// x 是当前的系统时间</span></span><br><span class="line">    [_disposable dispose]; <span class="comment">// 关闭计时器</span></span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
+
+<hr>
+<blockquote>
+<p>持续更新，学习到新的知识在记录下来，有需要的可以收藏一下。</p>
+</blockquote>
+<p><strong>我的传送门：</strong> <a href="https://karise.cn/">博客</a> 、<a target="_blank" rel="noopener" href="https://jianshu.com/u/63659e722f3b">简书</a> 、<a target="_blank" rel="noopener" href="https://weibo.com/karise">微博</a> 、<a target="_blank" rel="noopener" href="https://github.com/karise-guo">GitHub</a> 。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="爱吃鸭梨的猫 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="爱吃鸭梨的猫 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>爱吃鸭梨的猫
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://karise.cn/2017/06/16/iOS/201706161157/" title="【iOS 开发】ReactiveObjC（RAC）的使用汇总">https://karise.cn/2017/06/16/iOS/201706161157/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/iOS-%E5%BC%80%E5%8F%91/" rel="tag"># iOS 开发</a>
+              <a href="/tags/RAC/" rel="tag"># RAC</a>
+              <a href="/tags/RactiveCocoa/" rel="tag"># RactiveCocoa</a>
+              <a href="/tags/ReactiveObjC/" rel="tag"># ReactiveObjC</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/06/12/PHP/201706121613/" rel="prev" title="【PHP 开发】mac 在 PHP 环境安装 mcrypt 扩展的方法">
+      <i class="fa fa-chevron-left"></i> 【PHP 开发】mac 在 PHP 环境安装 mcrypt 扩展的方法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/06/30/iOS/201706301801/" rel="next" title="【iOS 开发】UICollectionView 集合视图使用汇总">
+      【iOS 开发】UICollectionView 集合视图使用汇总 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#ReactiveObjC-%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-text">ReactiveObjC 的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-RACSignal-%E4%BF%A1%E5%8F%B7"><span class="nav-text">1. RACSignal 信号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-RACSubject-%E4%BF%A1%E5%8F%B7"><span class="nav-text">2. RACSubject 信号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-RACTuple-%E5%85%83%E7%A5%96"><span class="nav-text">3. RACTuple 元祖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E4%BE%BF%E5%88%A9-Array-%E6%95%B0%E7%BB%84%E5%92%8C-Dictionary-%E5%AD%97%E5%85%B8"><span class="nav-text">4. 便利 Array 数组和 Dictionary 字典</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E7%9B%91%E5%90%AC-TextField-%E7%9A%84%E8%BE%93%E5%85%A5%E6%94%B9%E5%8F%98"><span class="nav-text">5. 监听 TextField 的输入改变</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E7%9B%91%E5%90%AC-Button-%E7%82%B9%E5%87%BB%E4%BA%8B%E4%BB%B6"><span class="nav-text">6. 监听 Button 点击事件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-%E7%99%BB%E5%BD%95%E6%8C%89%E9%92%AE%E7%8A%B6%E6%80%81%E5%AE%9E%E6%97%B6%E7%9B%91%E5%90%AC"><span class="nav-text">7. 登录按钮状态实时监听</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-%E7%9B%91%E5%90%AC-Notification-%E9%80%9A%E7%9F%A5%E4%BA%8B%E4%BB%B6"><span class="nav-text">8. 监听 Notification 通知事件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-%E4%BB%A3%E6%9B%BF-Delegate-%E4%BB%A3%E7%90%86%E6%96%B9%E6%B3%95"><span class="nav-text">9. 代替 Delegate 代理方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-%E4%BB%A3%E6%9B%BF-KVO-%E7%9B%91%E5%90%AC"><span class="nav-text">10. 代替 KVO 监听</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-%E4%BB%A3%E6%9B%BF-NSTimer-%E8%AE%A1%E6%97%B6%E5%99%A8"><span class="nav-text">11. 代替 NSTimer 计时器</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="爱吃鸭梨的猫"
+      src="/images/cat.jpg">
+  <p class="site-author-name" itemprop="name">爱吃鸭梨的猫</p>
+  <div class="site-description" itemprop="description">创造财富 才是时间最正确的归宿</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">76</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">119</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/karise" title="微博 → http:&#x2F;&#x2F;weibo.com&#x2F;karise" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>微博</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:292710547@qq.com" title="邮箱 → mailto:292710547@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>邮箱</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.jianshu.com/u/63659e722f3b" title="简书 → http:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;63659e722f3b" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/karise-guo" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;karise-guo" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heartbeat"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱吃鸭梨的猫</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+  <div style="display: none;">
+    <script data-pjax src="//s95.cnzz.com/z_stat.php?id=1262401548&web_id=1262401548"></script>
+  </div>
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/npm/algoliasearch@4/dist/algoliasearch-lite.umd.js"></script>
+<script src="//cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
+<script src="/js/algolia-search.js"></script>
+
+
+
+
+
+
+
+  <script src="//code.tidio.co/koavrszo8ljadwqznhu3xloogrgfg7gt.js"></script>
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '96fe4c8974d2415f9fc0',
+      clientSecret: 'ece2551d6a09bfe9f9421ac6e85f1472daf6122c',
+      repo        : 'BlogComment',
+      owner       : 'karise-guo',
+      admin       : ['karise-guo'],
+      id          : '06be842f65d527c3ad9e4255fbf42bc0',
+        language: 'zh-CN',
+      distractionFreeMode: false
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+    </div>
+</body>
+</html>

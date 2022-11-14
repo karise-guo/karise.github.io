@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/cat.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/cat.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/cat.jpg">
+  <link rel="mask-icon" href="/images/cat.jpg" color="#222">
+  <meta name="google-site-verification" content="6FbWia2UHu0Rj0-k91-sJlCX_0u5twNvlB9Nha097oc">
+  <meta name="baidu-site-verification" content="fecPuO9wLA">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"karise.cn","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"appID":"6R1TPR58SX","apiKey":"b7b85229dc744164111c058bfea5448c","indexName":"Karise","hits":{"per_page":10},"labels":{"input_placeholder":"请输入搜索内容...","hits_empty":"没有搜索到关于 “${query}” 的任何内容。","hits_stats":"一共搜索到 ${hits} 个结果，使用了 ${time} 毫秒。"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="有人可能会问有了 简书 为什么还需要 博客 ？身为一个 程序猿 怎么能没有一个自己的 博客 呢！虽然有了 简书，但是 博客 不受任何第三方管理，并且还能自定义成自己喜欢的界面，下面就开始讲一下搭建的方法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 Hexo 免费搭建属于自己的个人博客">
+<meta property="og:url" content="https://karise.cn/2017/05/03/Hexo/201705031747/index.html">
+<meta property="og:site_name" content="爱吃鸭梨的猫">
+<meta property="og:description" content="有人可能会问有了 简书 为什么还需要 博客 ？身为一个 程序猿 怎么能没有一个自己的 博客 呢！虽然有了 简书，但是 博客 不受任何第三方管理，并且还能自定义成自己喜欢的界面，下面就开始讲一下搭建的方法。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://file.karise.cn/blog/57364541-fe3de800-71b5-11e9-8ea4-08055d918517.png">
+<meta property="article:published_time" content="2017-05-03T09:47:00.000Z">
+<meta property="article:modified_time" content="2022-11-11T09:44:54.926Z">
+<meta property="article:author" content="爱吃鸭梨的猫">
+<meta property="article:tag" content="Hexo 博客">
+<meta property="article:tag" content="GitHub">
+<meta property="article:tag" content="GitHub Pages">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://file.karise.cn/blog/57364541-fe3de800-71b5-11e9-8ea4-08055d918517.png">
+
+<link rel="canonical" href="https://karise.cn/2017/05/03/Hexo/201705031747/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>使用 Hexo 免费搭建属于自己的个人博客 | 爱吃鸭梨的猫</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-101397377-1"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-101397377-1');
+      }
+    </script>
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?23e551cb7374b653d003004a84ced259";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="爱吃鸭梨的猫" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta custom-logo">
+      <div class="site-meta-headline">
+        <a>
+          <img class="custom-logo-image" src="/images/cat.jpg" alt="爱吃鸭梨的猫">
+        </a>
+      </div>
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">爱吃鸭梨的猫</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">创造财富 才是时间最正确的归宿</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>博客首页</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/catalog/" rel="section"><i class="fa fa-fw fa-list-ul"></i>博文目录</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-folder-open"></i>文章分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-cloud"></i>标签云集</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-hourglass-half"></i>我的历程</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/message/" rel="section"><i class="fa fa-fw fa-commenting"></i>给我留言</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于博主</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索文章
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="algolia-results">
+  <div id="algolia-stats"></div>
+  <div id="algolia-hits"></div>
+  <div id="algolia-pagination" class="algolia-pagination"></div>
+</div>
+
+      
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://karise.cn/2017/05/03/Hexo/201705031747/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/cat.jpg">
+      <meta itemprop="name" content="爱吃鸭梨的猫">
+      <meta itemprop="description" content="创造财富 才是时间最正确的归宿">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="爱吃鸭梨的猫">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          使用 Hexo 免费搭建属于自己的个人博客
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-05-03 17:47:00" itemprop="dateCreated datePublished" datetime="2017-05-03T17:47:00+08:00">2017-05-03</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-11-11 17:44:54" itemprop="dateModified" datetime="2022-11-11T17:44:54+08:00">2022-11-11</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Hexo-%E5%8D%9A%E5%AE%A2/" itemprop="url" rel="index"><span itemprop="name">Hexo 博客</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <div class="post-gallery" itemscope itemtype="http://schema.org/ImageGallery">
+            <img src="https://file.karise.cn/blog/57364541-fe3de800-71b5-11e9-8ea4-08055d918517.png" itemprop="contentUrl">
+        </div>
+        <blockquote>
+<p>有人可能会问有了 <code>简书</code> 为什么还需要 <code>博客</code> ？身为一个 <code>程序猿</code> 怎么能没有一个自己的 <code>博客</code> 呢！虽然有了 <code>简书</code>，但是 <code>博客</code> 不受任何第三方管理，并且还能自定义成自己喜欢的界面，下面就开始讲一下搭建的方法。</p>
+</blockquote>
+<a id="more"></a>
+
+<hr>
+<p>  <code>Hexo</code> 是一款基于 <code>Node.js</code> 的博客框架，应该是目前最流行的博客框架了，使用起来比较简单，以下是 <a href="https://karise.cn/">我的博客</a> 页面：</p>
+<p><img data-src="https://file.karise.cn/blog/57364951-bc617180-71b6-11e9-936c-917c25407c8d.png" alt="我的博客"></p>
+<p><img data-src="https://file.karise.cn/blog/57364982-cdaa7e00-71b6-11e9-9d1f-b3d80e154c99.png" alt="我的博客"></p>
+<h2 id="安装搭建博客必须的环境"><a href="#安装搭建博客必须的环境" class="headerlink" title="安装搭建博客必须的环境"></a>安装搭建博客必须的环境</h2><h3 id="1-安装-Git"><a href="#1-安装-Git" class="headerlink" title="1. 安装 Git"></a>1. 安装 Git</h3><p>这里就不说怎么安装了，相信会看这篇文章的一般都已经装了。</p>
+<h3 id="2-申请-GitHub-账号"><a href="#2-申请-GitHub-账号" class="headerlink" title="2. 申请 GitHub 账号"></a>2. 申请 GitHub 账号</h3><p><code>博客</code> 的 <code>远程创库</code>、<code>域名</code>、<code>服务器</code> 等都和 <a target="_blank" rel="noopener" href="https://github.com/">GitHub</a> 有关，这个必须要。</p>
+<h3 id="3-安装-Node-js"><a href="#3-安装-Node-js" class="headerlink" title="3. 安装 Node.js"></a>3. 安装 Node.js</h3><p>前往 <a target="_blank" rel="noopener" href="https://nodejs.org/">Node.js 官网</a> 下载最新版本的安装包安装即可。</p>
+<p><img data-src="https://file.karise.cn/blog/57365028-e2871180-71b6-11e9-9592-afe2459b2a0e.png" alt="安装 Node.js"></p>
+<h3 id="4-安装-Hexo"><a href="#4-安装-Hexo" class="headerlink" title="4. 安装 Hexo"></a>4. 安装 Hexo</h3><p>打开终端，输入以下命令安装 <code>Hexo</code> ，安装时间可能有点长，要多等一下。</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">npm install hexo-cli -g</span><br></pre></td></tr></table></figure>
+
+<p>如果出现以下报错：</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">Error: EACCES: permission denied, mkdir <span class="string">&#x27;/usr/local/lib/node_modules/hexo-cli&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>执行以下命令后，重新安装即可：</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">sudo chown -R $(whoami) $(npm config get prefix)/&#123;lib/node_modules,bin,share&#125; <span class="comment">#修改权限范围</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="开始搭建博客"><a href="#开始搭建博客" class="headerlink" title="开始搭建博客"></a>开始搭建博客</h2><p>以上环境必须全部安装完成后，才能开始搭建 <code>博客</code>。</p>
+<h3 id="1-创建-GitHub-仓库"><a href="#1-创建-GitHub-仓库" class="headerlink" title="1. 创建 GitHub 仓库"></a>1. 创建 GitHub 仓库</h3><p>打开 <a target="_blank" rel="noopener" href="https://github.com/">GitHub</a> 创建一个仓库，<code>Repository name</code> 为 <code>xxx.github.io</code>，<code>xxx</code> 处就是你 <code>GitHub</code> 的用户名，也就是前面 <code>Owner</code> 处显示的名字，命名必须这样，不能更改，这个仓库的名字也会是 <code>博客</code> 搭建完成后的域名。</p>
+<p><img data-src="https://file.karise.cn/blog/57365059-f2065a80-71b6-11e9-92f1-1f674f564e78.png" alt="创建 GitHub 仓库"></p>
+<h3 id="2-初始化-Hexo-博客"><a href="#2-初始化-Hexo-博客" class="headerlink" title="2. 初始化 Hexo 博客"></a>2. 初始化 Hexo 博客</h3><p>打开终端，执行以下命令初始化 <code>博客</code>，初始化完成后，你的系统根目录中会多一个名为 <code>Blog</code> 的文件夹，<code>Blog</code> 也可以更改成自己喜欢的名字，初始化时间也比较久，耐心等一下。</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">hexo init Blog</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-下载博客主题"><a href="#3-下载博客主题" class="headerlink" title="3. 下载博客主题"></a>3. 下载博客主题</h3><ul>
+<li><p><code>博客</code> 初始化完成以后，会有一个自带的 <code>博客主题</code> ，在 <code>Blog / themes </code> 文件夹下，但是比较丑，你可以下载一个自己喜欢的 <code>博客主题</code> 。</p>
+</li>
+<li><p>这里是 <code>博客主题</code> 的 <a target="_blank" rel="noopener" href="https://hexo.io/themes/">下载地址</a> ，只需要到主题对应的 <code>GitHub</code> 仓库将主题 <code>clone</code> 下来即可，这是我使用的主题 <a target="_blank" rel="noopener" href="https://github.com/monniya/hexo-theme-new-vno">下载地址</a> 。</p>
+</li>
+<li><p><code>clone</code> 完成后，将主题文件夹复制到 <code>Blog</code> 文件夹下的 <code>themes</code> 文件夹中。</p>
+</li>
+</ul>
+<h3 id="4-修改博客配置文件"><a href="#4-修改博客配置文件" class="headerlink" title="4. 修改博客配置文件"></a>4. 修改博客配置文件</h3><ul>
+<li><p>打开 <code>Blog</code> 文件夹下的 <code>_config.yml</code> 文件，修改其中的配置。</p>
+</li>
+<li><p>下面把几个必须修改的配置列出来按需求修改即可，配置的键值之间一定要有空格，否则会报错，想了解更多配置点击 <a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/configuration.html">这里</a> 。</p>
+</li>
+</ul>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">title:</span> <span class="string">Karise</span>  <span class="string">//博客的标题</span></span><br><span class="line"><span class="attr">subtitle:</span> <span class="string">个人博客</span> <span class="string">//博客的副标题</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">将来的你</span> <span class="string">一定会感激现在拼命的自己</span> <span class="string">//博客的描述</span></span><br><span class="line"><span class="attr">author:</span> <span class="string">Karise</span> <span class="string">//博客作者的名字</span></span><br><span class="line"><span class="attr">language:</span> <span class="string">zh-Hans</span> <span class="string">//语言中文</span></span><br><span class="line"></span><br><span class="line"><span class="attr">theme:</span> <span class="string">new-vno</span> <span class="string">//刚刚复制到</span> <span class="string">themes</span> <span class="string">文件夹下的主题名称</span></span><br><span class="line"></span><br><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">git</span> <span class="string">//使用</span> <span class="string">Git</span> <span class="string">发布</span></span><br><span class="line">  <span class="attr">repo:</span> <span class="string">https://github.com/karise-guo/karise.github.io.git</span> <span class="string">//刚创建的</span> <span class="string">Github</span> <span class="string">仓库地址</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>关于主题的配置在各自主题文件夹下的 <code>_config.yml</code> 文件中修改。</li>
+</ul>
+<h3 id="5-写博客文章"><a href="#5-写博客文章" class="headerlink" title="5. 写博客文章"></a>5. 写博客文章</h3><ul>
+<li>接下来可以开始写你的第一篇 <code>博客</code> 文章了，博客文章保存在 <code>Blog / source / _posts</code> 文件夹下，格式为 <code>MarkDown</code> 格式，也就是 <code>.md</code> 后缀的文件，编码格式为 <code>UTF-8</code> ，否则会显示乱码。</li>
+</ul>
+<p><strong>例如：</strong> 创建一个名为 <code>测试文章.md</code> 的文件，内容为：</p>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">---</span><br><span class="line">title: 测试文章 //文章的标题</span><br><span class="line">date: 2017-05-03 17:47 //文章的发布时间</span><br><span class="line">categories: 测试分类 //分类名称</span><br><span class="line">tags: 测试标签 //标签名称</span><br><span class="line">photos: https://karise.cn/images/karise.jpg //需要展示的图片地址</span><br><span class="line">---</span><br><span class="line"></span><br><span class="line"> &gt; 这是一篇测试文章。</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意：</strong> 每一篇文章中，开头都必须有 <code>---</code> 之间的那些参数，参数 <code>:</code> 后面必须有空格，文章的 <code>标题</code> 是必填的，否则文章不会显示在博客中，其他参数看自己的需求填写，<code>categories 、tags 、photos </code> 这三个参数可填写多个，填写多个时用 <code>[ xx, xx ]</code> 格式区分，例如：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">---</span><br><span class="line">title: 测试文章 &#x2F;&#x2F;文章的标题</span><br><span class="line">date: 2017-05-03 17:47 &#x2F;&#x2F;文章的发布时间</span><br><span class="line">categories: [测试分类1, 测试分类2, 测试分类3] &#x2F;&#x2F;分类名称</span><br><span class="line">tags: [测试标签1, 测试标签2, 测试标签3] &#x2F;&#x2F;标签名称</span><br><span class="line">photos: [https:&#x2F;&#x2F;karise.cn&#x2F;images&#x2F;karise.jpg, https:&#x2F;&#x2F;karise.cn&#x2F;images&#x2F;karise.jpg, https:&#x2F;&#x2F;karise.cn&#x2F;images&#x2F;karise.jpg] &#x2F;&#x2F;需要展示的图片地址</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>如果要在博客的首页显示每篇文章的 <code>摘要</code> ，只要在文章中加入以下 <code>分隔符</code> 即可，该 <code>分隔符</code> 之前的所有内容都会被自动截取为文章的 <code>摘要</code> 。</li>
+</ul>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="xml"><span class="comment">&lt;!-- more --&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<h3 id="6-本地测试博客"><a href="#6-本地测试博客" class="headerlink" title="6. 本地测试博客"></a>6. 本地测试博客</h3><ul>
+<li>打开终端 <code>cd</code> 到 <code>Blog</code> 目录下，输入以下命令：</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">hexo s</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>接着浏览器中输入 <a target="_blank" rel="noopener" href="http://localhost:4000/">http://localhost:4000/</a> 就能够看到 <code>博客</code> 的搭建效果。</li>
+</ul>
+<h2 id="发布博客"><a href="#发布博客" class="headerlink" title="发布博客"></a>发布博客</h2><p>本地显示没问题以后，就可以将 <code>博客</code> 发布到 <code>GitHub</code> 服务器上了。</p>
+<h3 id="1-安装自动部署发布插件"><a href="#1-安装自动部署发布插件" class="headerlink" title="1. 安装自动部署发布插件"></a>1. 安装自动部署发布插件</h3><p>第一次配置时需要安装 <code>hexo-deployer-git</code> 自动部署发布工具，打开终端 <code>cd</code> 到 <code>Blog</code> 目录下，执行以下命令安装。</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">npm install hexo-deployer-git --save</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-发布博客到服务器"><a href="#2-发布博客到服务器" class="headerlink" title="2. 发布博客到服务器"></a>2. 发布博客到服务器</h3><ul>
+<li>打开终端 <code>cd</code> 到 <code>Blog</code> 目录下，输入以下命令：</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">hexo clean &amp;&amp; hexo g &amp;&amp; hexo d</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>如果这是你的第一次，终端可能会让你输入 <code>Github</code> 的邮箱和密码，输入完成后，就会把你的 <code>博客</code> 自动上传至 <code>Github</code> 了。</p>
+</li>
+<li><p>以后在每一次添加新的 <code>博客</code> 文章或者改变配置时，执行一下这个命令就可以直接发布了。</p>
+</li>
+<li><p>发布完成后，浏览器中输入之前创建的 <code>Github</code> 仓库名，就能访问到你搭建的 <code>博客</code> 了，我的是 <a target="_blank" rel="noopener" href="https://karise.github.io/">karise.github.io</a> 。</p>
+</li>
+</ul>
+<hr>
+<blockquote>
+<p>简单的 <code>博客</code> 搭建流程就是这样了，还有很多不错的 <a target="_blank" rel="noopener" href="https://hexo.io/plugins/">插件</a> ，比如 <code>评论</code>、<code>标签</code>、<code>统计</code> 等等，这些自己去研究并慢慢完善自己的博客吧。</p>
+</blockquote>
+<p><strong>我的传送门：</strong> <a href="https://karise.cn/">博客</a> 、<a target="_blank" rel="noopener" href="https://jianshu.com/u/63659e722f3b">简书</a> 、<a target="_blank" rel="noopener" href="https://weibo.com/karise">微博</a> 、<a target="_blank" rel="noopener" href="https://github.com/karise-guo">GitHub</a> 。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="爱吃鸭梨的猫 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="爱吃鸭梨的猫 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>爱吃鸭梨的猫
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://karise.cn/2017/05/03/Hexo/201705031747/" title="使用 Hexo 免费搭建属于自己的个人博客">https://karise.cn/2017/05/03/Hexo/201705031747/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Hexo-%E5%8D%9A%E5%AE%A2/" rel="tag"># Hexo 博客</a>
+              <a href="/tags/GitHub/" rel="tag"># GitHub</a>
+              <a href="/tags/GitHub-Pages/" rel="tag"># GitHub Pages</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/04/28/Tool/201704281000/" rel="prev" title="Windows 版 SourceTree 免登录跳过初始设置的方法">
+      <i class="fa fa-chevron-left"></i> Windows 版 SourceTree 免登录跳过初始设置的方法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/05/05/Hexo/201705051311/" rel="next" title="给 Hexo 搭建的博客增加 百度 和 谷歌 的搜索引擎验证">
+      给 Hexo 搭建的博客增加 百度 和 谷歌 的搜索引擎验证 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%E5%BF%85%E9%A1%BB%E7%9A%84%E7%8E%AF%E5%A2%83"><span class="nav-text">安装搭建博客必须的环境</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%AE%89%E8%A3%85-Git"><span class="nav-text">1. 安装 Git</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%94%B3%E8%AF%B7-GitHub-%E8%B4%A6%E5%8F%B7"><span class="nav-text">2. 申请 GitHub 账号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%AE%89%E8%A3%85-Node-js"><span class="nav-text">3. 安装 Node.js</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E5%AE%89%E8%A3%85-Hexo"><span class="nav-text">4. 安装 Hexo</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%A7%8B%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2"><span class="nav-text">开始搭建博客</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%88%9B%E5%BB%BA-GitHub-%E4%BB%93%E5%BA%93"><span class="nav-text">1. 创建 GitHub 仓库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%88%9D%E5%A7%8B%E5%8C%96-Hexo-%E5%8D%9A%E5%AE%A2"><span class="nav-text">2. 初始化 Hexo 博客</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E4%B8%8B%E8%BD%BD%E5%8D%9A%E5%AE%A2%E4%B8%BB%E9%A2%98"><span class="nav-text">3. 下载博客主题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E4%BF%AE%E6%94%B9%E5%8D%9A%E5%AE%A2%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-text">4. 修改博客配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%86%99%E5%8D%9A%E5%AE%A2%E6%96%87%E7%AB%A0"><span class="nav-text">5. 写博客文章</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E6%9C%AC%E5%9C%B0%E6%B5%8B%E8%AF%95%E5%8D%9A%E5%AE%A2"><span class="nav-text">6. 本地测试博客</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%91%E5%B8%83%E5%8D%9A%E5%AE%A2"><span class="nav-text">发布博客</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%AE%89%E8%A3%85%E8%87%AA%E5%8A%A8%E9%83%A8%E7%BD%B2%E5%8F%91%E5%B8%83%E6%8F%92%E4%BB%B6"><span class="nav-text">1. 安装自动部署发布插件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%8F%91%E5%B8%83%E5%8D%9A%E5%AE%A2%E5%88%B0%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-text">2. 发布博客到服务器</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="爱吃鸭梨的猫"
+      src="/images/cat.jpg">
+  <p class="site-author-name" itemprop="name">爱吃鸭梨的猫</p>
+  <div class="site-description" itemprop="description">创造财富 才是时间最正确的归宿</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">76</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">119</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/karise" title="微博 → http:&#x2F;&#x2F;weibo.com&#x2F;karise" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>微博</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:292710547@qq.com" title="邮箱 → mailto:292710547@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>邮箱</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://www.jianshu.com/u/63659e722f3b" title="简书 → http:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;63659e722f3b" rel="noopener" target="_blank"><i class="fa fa-fw fa-book"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://github.com/karise-guo" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;karise-guo" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heartbeat"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱吃鸭梨的猫</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+  <div style="display: none;">
+    <script data-pjax src="//s95.cnzz.com/z_stat.php?id=1262401548&web_id=1262401548"></script>
+  </div>
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/npm/algoliasearch@4/dist/algoliasearch-lite.umd.js"></script>
+<script src="//cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
+<script src="/js/algolia-search.js"></script>
+
+
+
+
+
+
+
+  <script src="//code.tidio.co/koavrszo8ljadwqznhu3xloogrgfg7gt.js"></script>
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '96fe4c8974d2415f9fc0',
+      clientSecret: 'ece2551d6a09bfe9f9421ac6e85f1472daf6122c',
+      repo        : 'BlogComment',
+      owner       : 'karise-guo',
+      admin       : ['karise-guo'],
+      id          : '6c62ad82095bcc3d0a091e2591736501',
+        language: 'zh-CN',
+      distractionFreeMode: false
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+    </div>
+</body>
+</html>
